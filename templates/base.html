@@ -90,12 +90,11 @@
           <div class="site-footer__logo">
             <img src="{% static 'images/placeholders/logo.svg' %}" alt="{% trans 'Velegrad Estate' %}" width="160" height="40">
           </div>
-          {# TODO (Story 2.2): vezati kontakt podatke na SiteSettings model umesto statičkog placeholdera. #}
           <div class="site-footer__contact-info">
-            <span>{% trans "Beograd, Srbija" %}</span>
-            <a href="tel:+381601234567">+381 60 123 4567</a>
-            <a href="mailto:info@velegradestate.rs">info@velegradestate.rs</a>
-            <a href="https://wa.me/381601234567" target="_blank" rel="noopener">WhatsApp</a>
+            {% if site_settings.address %}<span>{{ site_settings.address }}</span>{% endif %}
+            {% if site_settings.phone_primary %}<a href="tel:{{ site_settings.phone_primary }}">{{ site_settings.phone_primary }}</a>{% endif %}
+            {% if site_settings.email_primary %}<a href="mailto:{{ site_settings.email_primary }}">{{ site_settings.email_primary }}</a>{% endif %}
+            {% if site_settings.whatsapp_number %}<a href="https://wa.me/{{ site_settings.whatsapp_number }}" target="_blank" rel="noopener">WhatsApp</a>{% endif %}
           </div>
         </div>
         <div>

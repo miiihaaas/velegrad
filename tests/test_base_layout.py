@@ -192,13 +192,18 @@ def test_home_includes_main_js_with_defer(client):
 
 @pytest.mark.django_db
 def test_home_does_not_include_pages_css_globally(client):
-    # AC1/T6: the minimal 2.1 home must NOT pull a per-page pages/*.css; the base
-    # cascade alone is enough to validate the layout (per-page CSS is later epics).
+    # Story 2.2 (AC7) intentionally moves the page-CSS boundary: home.html now
+    # loads its OWN per-page CSS (css/pages/home.css) via {% block extra_css %}.
+    # The original 2.1 assertion ("home must not include ANY pages/home.css")
+    # encoded the 2.1-era frame where Home had no page CSS; 2.2 legitimately adds
+    # it. Narrowed assertion: home MAY load its own home.css, but must NOT pull in
+    # OTHER pages' CSS (e.g. about/contact).
     resp = client.get("/")
     assert resp.status_code == 200
     html = resp.content.decode("utf-8")
-    assert "css/pages/home.css" not in html and "pages/home.css" not in html, (
-        "the minimal 2.1 home must not include per-page pages/home.css (T6)."
+    assert "css/pages/about.css" not in html and "css/pages/contact.css" not in html, (
+        "home must not include OTHER pages' per-page CSS; only css/pages/home.css "
+        "is allowed (2.2 AC7 moved the boundary)."
     )
 
 
@@ -642,15 +647,21 @@ def test_base_defines_overridable_head_and_js_blocks():
 # =========================================================================== #
 @pytest.mark.django_db
 def test_home_does_not_include_any_pages_css_globally(client):
-    # AC1/T6 (generalized): the base/home render must include NO css/pages/* at
-    # all (not just home.css) — per-page CSS is included per-page in later epics.
-    # Adding any pages/*.css globally to base would (correctly) fail this.
+    # Story 2.2 (AC7) moved the page-CSS boundary: home.html now loads its own
+    # css/pages/home.css per-page via {% block extra_css %} (NOT in base). The
+    # original 2.1 assertion ("no css/pages/* at all") is narrowed: home loads
+    # ONLY its own home.css; no OTHER pages/*.css must leak into the render, and
+    # base must still not pull page CSS globally for non-home pages.
     resp = client.get("/")
     assert resp.status_code == 200
     html = resp.content.decode("utf-8")
-    assert "css/pages/" not in html, (
-        "the base/home render must not reference any css/pages/* stylesheet "
-        "globally — per-page CSS belongs in {% block extra_css %} per page (T6)."
+    import re
+    # Every css/pages/* reference on the home render must be home.css.
+    pages_css = re.findall(r"css/pages/([^\"'\s]+\.css)", html)
+    assert pages_css, "home must load its own per-page CSS (css/pages/home.css) (AC7)."
+    assert all(name == "home.css" for name in pages_css), (
+        "the only per-page CSS allowed on the home render is css/pages/home.css; "
+        f"found other pages/*.css: {sorted(set(pages_css))} (2.2 AC7 boundary)."
     )
 
 

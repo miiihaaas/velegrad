@@ -41,7 +41,7 @@
 # - Klijentski blokirajuci inputi se prikupljaju PARALELNO sa Epikom 1 (IR #4) - eksterna zavisnost, NE kodna prica.
 
 generated: 2026-06-01
-last_updated: 2026-06-02 (2.1 created -> ready-for-dev; epic-2 backlog -> in-progress)
+last_updated: 2026-06-02 (2.2 created -> ready-for-dev; epic-2 in-progress)
 project: VELEGRAD
 project_key: NOKEY
 tracking_system: file-system
@@ -59,7 +59,7 @@ development_status:
   # ---- Epic 2: Frontend dizajn sistem i Home (Faza 2) ----
   epic-2: in-progress
   2-1-integracija-dizajn-sistema-i-bazni-layout: done
-  2-2-home-stranica-povezana-sa-bazom: backlog
+  2-2-home-stranica-povezana-sa-bazom: done
   epic-2-retrospective: optional
 
   # ---- Epic 3: Signature listing i Property Detail (Faza 3) ----

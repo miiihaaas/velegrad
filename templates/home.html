@@ -1,17 +1,210 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% comment %}
-  Minimalni placeholder home (Story 2.1) — validira bazni layout/okvir.
-  TODO (Story 2.2): povezati Home stranicu sa bazom (Hero, Founder, Featured
-  nekretnine) i uključiti per-stranica pages/home.css preko {% block extra_css %}.
+  Story 2.2 — Home stranica povezana sa bazom.
+  Šest sekcija (A–F) iz docs/OpenDesignFiles/index.html (linije 69–296),
+  napunjene sadržajem iz baze: SiteSettings (hero/founder/kontakt) preko
+  context procesora `site_settings`, Property (featured) preko HomeView.
+
+  Konvencije (LOCKED):
+   - Sadržaj iz baze renderuje se DIREKTNO preko _sr polja ({{ ..._sr }}),
+     NIKAD .localized("...") u {{ }} (Django ne prosleđuje string-arg).
+   - UI copy → {% trans %}.
+   - Forward-linkovi ka još-nepostojećim rutama su HARDKODOVANI APSOLUTNI
+     hrefovi (/properties/, /private-collection/, Contact → /), NE {% url %}
+     (NoReverseMatch → 500).
 {% endcomment %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/home.css' %}">
+{% endblock %}
 
 {% block content %}
 <main>
-  <section class="container">
-    <h1>{% trans "Velegrad Estate" %}</h1>
-    <p>{% trans "Diskrecija. Stručnost. Rezultati." %}</p>
+
+  <!-- ════ Section A — Hero ════ -->
+  <section class="hero" aria-label="{% trans 'Hero' %}">
+    <div class="hero__bg">
+      <img src="{% if site_settings.hero_image %}{{ site_settings.hero_image.url }}{% else %}{% static 'images/placeholders/hero-placeholder.svg' %}{% endif %}"
+           alt="{% trans 'Velegrad Estate' %}">
+    </div>
+    <div class="hero__overlay"></div>
+    <div class="hero__content">
+      <p class="hero__kicker">
+        {% if site_settings.founder_name %}{{ site_settings.founder_name }}{% if site_settings.founder_title_sr %} — {{ site_settings.founder_title_sr }}{% endif %}{% else %}{% trans "Privatni savetnik za premium nekretnine" %}{% endif %}
+      </p>
+      <h1 class="hero__tagline">{{ site_settings.hero_headline_sr }}</h1>
+      <div class="hero__cta">
+        <a href="/" class="btn btn--ghost btn--lg">{{ site_settings.hero_cta_text_sr }}</a>
+      </div>
+    </div>
   </section>
+
+  <!-- ════ Section B — Personal Brand / Advisor ════ -->
+  <section class="section section--ivory" aria-label="{% trans 'O osnivaču' %}">
+    <div class="container">
+      <div class="advisor">
+        <div class="advisor__portrait">
+          <img src="{% if site_settings.founder_photo %}{{ site_settings.founder_photo.url }}{% else %}{% static 'images/placeholders/founder-portrait.svg' %}{% endif %}"
+               alt="{{ site_settings.founder_name }}">
+        </div>
+        <div class="advisor__content">
+          <p class="eyebrow">{% trans "Osnivač i privatni savetnik" %}</p>
+          <h2 class="advisor__name">{{ site_settings.founder_name }}</h2>
+          <p class="advisor__title">{{ site_settings.founder_title_sr }}</p>
+          <hr class="separator">
+          {# founder_bio_sr je admin-curated (singleton, samo superuser uređuje) → |safe je bezbedan. #}
+          <div class="advisor__text">{{ site_settings.founder_bio_sr|safe }}</div>
+          <div class="advisor__contact">
+            {% if site_settings.phone_primary %}<a href="tel:{{ site_settings.phone_primary }}" class="btn btn--primary btn--sm">{% trans "Pozovi direktno" %}</a>{% endif %}
+            {% if site_settings.whatsapp_number %}<a href="https://wa.me/{{ site_settings.whatsapp_number }}" class="btn btn--champagne btn--sm" target="_blank" rel="noopener">{% trans "WhatsApp" %}</a>{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ Section C — Signature Properties (Preview) ════ -->
+  <section class="section" aria-label="{% trans 'Odabrane nekretnine' %}">
+    <div class="container">
+      <div class="properties-preview__header">
+        <h2>{% trans "Odabrane nekretnine" %}</h2>
+        <a href="/properties/" class="link-arrow">{% trans "Pogledajte sve" %}</a>
+      </div>
+      <div class="properties-preview__grid">
+        {% for p in featured_properties %}
+          <article class="property-card">
+            <div class="property-card__image">
+              {# Bez hero_image rotiramo property-1..4.svg po indeksu (forloop.counter 1–4; queryset je [:4]) da 4 kartice dobiju različite placeholdere. #}
+              {% with idx=forloop.counter|stringformat:"s" %}
+              {% with placeholder_name="images/placeholders/property-"|add:idx|add:".svg" %}
+              <img src="{% if p.hero_image %}{{ p.hero_image.url }}{% else %}{% static placeholder_name %}{% endif %}"
+                   alt="{{ p.title }}">
+              {% endwith %}{% endwith %}
+              <span class="badge property-card__badge">{{ p.get_status_display }}</span>
+            </div>
+            <div class="property-card__body">
+              <h3 class="property-card__title">{{ p.title }}</h3>
+              <div class="property-card__meta">
+                <span>{{ p.get_property_type_display }}</span>
+                <span>{{ p.area_sqm|floatformat:0 }} m²</span>
+                {# SR MVP: jedan ispravan token. Pravilna SR pluralizacija (1 soba / 2–4 sobe / 5+ soba) dolazi sa i18n .po plural-forms u Epic 6. #}
+                <span>{{ p.bedrooms }} {% trans "soba" %}</span>
+              </div>
+              <div class="property-card__price">
+                {% if p.price_on_request or p.status == "price_on_request" %}{% trans "Cena na upit" %}{% else %}€{{ p.price|floatformat:0 }}{% endif %}
+              </div>
+              <a href="/properties/" class="property-card__cta">{% trans "Detaljnije" %}</a>
+            </div>
+          </article>
+        {% empty %}
+          <p class="properties-preview__empty text-muted">{% trans "Odabrane nekretnine uskoro." %}</p>
+        {% endfor %}
+      </div>
+      <div class="properties-preview__footer">
+        <a href="/properties/" class="btn btn--secondary">{% trans "Pogledajte sve odabrane nekretnine" %}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ Section D — Private Collection Teaser ════ -->
+  <section class="section section--dark" aria-label="{% trans 'Privatna kolekcija' %}">
+    <div class="container">
+      <div class="private-teaser">
+        <p class="eyebrow mb-sm">{% trans "Ekskluzivno" %}</p>
+        <h2>{% trans "Privatna kolekcija" %}</h2>
+        <p>{% trans "Odabrane nekretnine nisu javno oglašene i dostupne su isključivo kvalifikovanim klijentima. Kontaktirajte nas za pristup portfoliju privatne kolekcije." %}</p>
+        <a href="/private-collection/" class="btn btn--ghost">{% trans "Pristupite privatnoj kolekciji" %}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ Section E — Why Velegrad (Pillars) ════ -->
+  <section class="section section--ivory" aria-label="{% trans 'Zašto Velegrad' %}">
+    <div class="container">
+      <div class="text-center mb-lg">
+        <h2>{% trans "Zašto Velegrad" %}</h2>
+      </div>
+      <div class="pillars-grid">
+
+        <div class="pillar">
+          <svg class="pillar__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M24 4L20 8H8v32h32V8H28L24 4z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <circle cx="24" cy="24" r="6" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <h3 class="pillar__title">{% trans "Diskrecija" %}</h3>
+          <p class="pillar__text">{% trans "Svaka transakcija i svaki razgovor ostaju strogo poverljivi." %}</p>
+        </div>
+
+        <div class="pillar">
+          <svg class="pillar__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M8 40L20 28l6 6 14-14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M30 20h10v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h3 class="pillar__title">{% trans "Pregovaranje" %}</h3>
+          <p class="pillar__text">{% trans "Zastupamo isključivo Vaše interese — bez kompromisa." %}</p>
+        </div>
+
+        <div class="pillar">
+          <svg class="pillar__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M24 6v4M24 38v4M6 24h4M38 24h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="24" cy="24" r="4" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <h3 class="pillar__title">{% trans "Premium mreža" %}</h3>
+          <p class="pillar__text">{% trans "Pristup nekretninama koje nikada neće biti javno oglašene." %}</p>
+        </div>
+
+        <div class="pillar">
+          <svg class="pillar__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M10 32c4-6 10-8 14-8s10 2 14 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M6 24h36" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+            <ellipse cx="24" cy="24" rx="8" ry="18" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+          </svg>
+          <h3 class="pillar__title">{% trans "Međunarodni klijenti" %}</h3>
+          <p class="pillar__text">{% trans "Iskustvo sa kupcima i investitorima iz Francuske, Nemačke i UK." %}</p>
+        </div>
+
+        <div class="pillar">
+          <svg class="pillar__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M24 8C16 8 10 14 10 22c0 10 14 20 14 20s14-10 14-20c0-8-6-14-14-14z" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="24" cy="22" r="5" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <h3 class="pillar__title">{% trans "Lični pristup" %}</h3>
+          <p class="pillar__text">{% trans "Radimo sa ograničenim brojem klijenata." %}</p>
+        </div>
+
+        <div class="pillar">
+          <svg class="pillar__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="8" y="14" width="32" height="24" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M16 14V10a8 8 0 0 1 16 0v4" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="24" cy="27" r="3" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="24" y1="30" x2="24" y2="34" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <h3 class="pillar__title">{% trans "Pouzdanost" %}</h3>
+          <p class="pillar__text">{% trans "Dugogodišnje prisustvo na premium segmentu beogradskog tržišta." %}</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ Section F — Contact Teaser ════ -->
+  <section class="section" aria-label="{% trans 'Kontakt' %}">
+    <div class="container">
+      <div class="contact-teaser">
+        <p class="eyebrow mb-sm">{% trans "Privatno savetovanje" %}</p>
+        <h2>{% trans "Zakažite razgovor" %}</h2>
+        <p class="text-muted">{% trans "Svaki razgovor počinje razumevanjem Vaših potreba. Javite nam se direktno." %}</p>
+        <div class="contact-teaser__links">
+          <a href="/" class="btn btn--primary">{% trans "Zakažite razgovor" %}</a>
+          {% if site_settings.phone_primary %}<a href="tel:{{ site_settings.phone_primary }}" class="btn btn--secondary">{% trans "Pozovite direktno" %}</a>{% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
 </main>
 {% endblock %}
