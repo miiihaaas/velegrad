@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <rect width="1920" height="1080" fill="#1C1C1C"/>
+  <rect x="0" y="0" width="1920" height="1080" fill="#4A5240" opacity="0.3"/>
+  <text x="960" y="520" font-family="-apple-system, sans-serif" font-size="18" fill="rgba(245,240,232,0.4)" text-anchor="middle" letter-spacing="0.2em">HERO — CINEMATIC PROPERTY LANDSCAPE</text>
+  <line x1="900" y1="545" x2="1020" y2="545" stroke="#C9A96E" stroke-width="1" opacity="0.3"/>
+</svg>

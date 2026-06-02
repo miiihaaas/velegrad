@@ -1,0 +1,47 @@
+/* ============================================
+   VELEGRAD ESTATE — International Clients
+   (Dark Theme)
+   ============================================ */
+
+.intl-hero {
+  padding-block-start: calc(80px + var(--space-xl));
+  padding-block-end: var(--space-lg);
+  text-align: center;
+}
+
+.intl-hero h1 {
+  margin-block-end: var(--space-sm);
+}
+
+.intl-hero__tagline {
+  font-family: var(--font-serif);
+  font-size: var(--text-body-lg);
+  color: var(--color-text-secondary);
+  max-width: 560px;
+  margin-inline: auto;
+}
+
+.intl-intro {
+  max-width: var(--container-text);
+  margin-inline: auto;
+}
+
+.intl-intro p {
+  font-size: var(--text-body-lg);
+  line-height: 1.5;
+}
+
+.intl-legal {
+  max-width: var(--container-text);
+  margin-inline: auto;
+}
+
+.intl-legal p {
+  font-size: var(--text-body-lg);
+  line-height: 1.8;
+}
+
+.timeline__content h3 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+}

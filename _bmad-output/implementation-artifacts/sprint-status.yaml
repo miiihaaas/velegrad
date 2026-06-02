@@ -1,0 +1,89 @@
+# generated: 2026-06-01
+# last_updated: 2026-06-01 (1.1 created -> ready-for-dev; epic-1 -> in-progress)
+# project: VELEGRAD
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog -> in-progress: Automatically when first story is created (via create-story)
+#   - in-progress -> done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+#
+# VELEGRAD ESTATE - NAPOMENE (vidi sprint-plan.md za detalje):
+# - Redosled je linearan 1.1 -> 6.4 (backward zavisnosti); usaglasen sa fazama razvoja zadatka §7.
+# - i18n od prvog template-a: sve UI stringove pisati kroz {% trans %}/{% loc %} vec u Epiku 2 (IR #1).
+# - Forme hvataju Inquiry u bazu vec u Epic 3/4; email notifikacija je aditivna u 5.2 (IR #2).
+# - Klijentski blokirajuci inputi se prikupljaju PARALELNO sa Epikom 1 (IR #4) - eksterna zavisnost, NE kodna prica.
+
+generated: 2026-06-01
+last_updated: 2026-06-01
+project: VELEGRAD
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  # ---- Epic 1: Setup, CMS modeli i brendiran admin (Faza 1) ----
+  epic-1: in-progress
+  1-1-inicijalizacija-django-projekta-i-okruzenja: done
+  1-2-cms-modeli-i-migracije: backlog
+  1-3-brendiran-admin-i-dashboard: backlog
+  1-4-admin-upravljanje-nekretninama-upitima-i-podesavanjima: backlog
+  epic-1-retrospective: optional
+
+  # ---- Epic 2: Frontend dizajn sistem i Home (Faza 2) ----
+  epic-2: backlog
+  2-1-integracija-dizajn-sistema-i-bazni-layout: backlog
+  2-2-home-stranica-povezana-sa-bazom: backlog
+  epic-2-retrospective: optional
+
+  # ---- Epic 3: Signature listing i Property Detail (Faza 3) ----
+  epic-3: backlog
+  3-1-signature-listing-sa-server-side-filterima: backlog
+  3-2-property-detail-stranica: backlog
+  epic-3-retrospective: optional
+
+  # ---- Epic 4: Staticne stranice - About, International, Contact (Faza 4) ----
+  epic-4: backlog
+  4-1-about-i-international-stranice-iz-cms-a: backlog
+  4-2-contact-stranica-sa-formom-i-direktnim-kontaktom: backlog
+  epic-4-retrospective: optional
+
+  # ---- Epic 5: Private Collection i inquiry sistem (Faza 5) ----
+  epic-5: backlog
+  5-1-private-collection-stranica-i-intake-forma: backlog
+  5-2-inquiry-pipeline-cuvanje-notifikacija-auto-reply-anti-spam: backlog
+  epic-5-retrospective: optional
+
+  # ---- Epic 6: Multilingual, SEO, performanse i deploy (Faza 6 + 7) ----
+  epic-6: backlog
+  6-1-dvojezicnost-sr-en: backlog
+  6-2-seo: backlog
+  6-3-performanse-i-optimizacija-slika: backlog
+  6-4-deploy-na-vps-i-obuka-klijenta: backlog
+  epic-6-retrospective: optional

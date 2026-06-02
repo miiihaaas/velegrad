@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
+  <rect width="800" height="1000" fill="#2a2d26"/>
+  <rect x="0" y="0" width="800" height="1000" fill="#4A5240" opacity="0.2"/>
+  <text x="400" y="490" font-family="-apple-system, sans-serif" font-size="16" fill="rgba(245,240,232,0.4)" text-anchor="middle" letter-spacing="0.15em">FOUNDER PORTRAIT</text>
+  <text x="400" y="520" font-family="-apple-system, sans-serif" font-size="12" fill="rgba(245,240,232,0.25)" text-anchor="middle">Đorđije Potpara</text>
+  <line x1="360" y1="545" x2="440" y2="545" stroke="#C9A96E" stroke-width="1" opacity="0.3"/>
+</svg>

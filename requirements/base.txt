@@ -1,0 +1,33 @@
+# Runtime dependencies (architecture §4).
+# Target platform: Python 3.12, Django 5.2 LTS, PostgreSQL 16.
+# NOTE: `Django==5.2.*` is NOT a valid pip pin (pip rejects the `.*` wildcard
+# in `==`); use the range pin below.
+Django>=5.2,<5.3
+
+# Database
+psycopg[binary]
+
+# Configuration
+django-environ
+
+# Admin / CMS
+django-unfold
+django-admin-sortable2
+django-tinymce
+
+# Images
+Pillow
+django-imagekit
+
+# Storage (S3 backend wired in a later story)
+django-storages
+# boto3  # deferred S3 dependency — uncomment when S3 storage is activated (arch §1.4)
+
+# Email
+django-anymail[mailgun]
+
+# Security / anti-spam
+django-ratelimit
+
+# Static file serving
+whitenoise

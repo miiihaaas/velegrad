@@ -1,0 +1,5 @@
+-r base.txt
+
+# Development & testing tooling
+pytest
+pytest-django
