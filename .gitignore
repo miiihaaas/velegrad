@@ -13,6 +13,9 @@ staticfiles/
 *.log
 local_settings.py
 db.sqlite3
+# Lokalne SQLite dev baze (npr. dev-local.sqlite3 iz scripts/seed_demo.py)
+*.sqlite3
+dev-local.sqlite3
 
 # Virtual environments
 .venv/
