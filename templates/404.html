@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "404 — Stranica nije pronađena" %} — Velegrad Estate{% endblock %}
+
+{% block meta_description %}
+<meta name="description" content="{% trans 'Tražena stranica ne postoji ili je premeštena.' %}">
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/error.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="error-page" role="main">
+  <div class="error-page__content">
+    <div class="error-page__code">404</div>
+    <h1>{% trans "Stranica nije pronađena" %}</h1>
+    <p>{% trans "Tražena stranica ne postoji ili je premeštena." %}</p>
+    <div class="error-page__ctas">
+      <a href="/" class="btn btn--primary">{% trans "Vratite se na početnu" %}</a>
+      {# TODO (Epik 3): zameniti sa {% url 'contact' %} kad contact ruta postoji. Privremeni fallback je "/" po Interface Contract-u; do tada vodi na kontakt sekciju u footeru da druga CTA ne bi tiho vodila na istu "/" lokaciju kao prva. #}
+      <a href="#site-footer" class="btn btn--secondary">{% trans "Kontaktirajte nas" %}</a>
+    </div>
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="900" viewBox="0 0 1920 900">
+  <rect width="1920" height="900" fill="#1C1C1C"/>
+  <rect x="0" y="0" width="1920" height="900" fill="#4A5240" opacity="0.2"/>
+  <text x="960" y="435" font-family="-apple-system, sans-serif" font-size="18" fill="rgba(245,240,232,0.35)" text-anchor="middle" letter-spacing="0.2em">PROPERTY DETAIL — HERO IMAGE</text>
+  <text x="960" y="465" font-family="-apple-system, sans-serif" font-size="12" fill="rgba(245,240,232,0.2)" text-anchor="middle">Penthouse Rezidencija — Panoramski Pogled</text>
+  <line x1="910" y1="490" x2="1010" y2="490" stroke="#C9A96E" stroke-width="1" opacity="0.25"/>
+</svg>

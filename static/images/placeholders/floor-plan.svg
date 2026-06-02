@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#F5F0E8"/>
+  <rect x="80" y="80" width="640" height="440" fill="none" stroke="#C9A96E" stroke-width="1" opacity="0.3"/>
+  <rect x="80" y="80" width="320" height="220" fill="none" stroke="#1C1C1C" stroke-width="0.5" opacity="0.15"/>
+  <rect x="400" y="80" width="320" height="220" fill="none" stroke="#1C1C1C" stroke-width="0.5" opacity="0.15"/>
+  <rect x="80" y="300" width="200" height="220" fill="none" stroke="#1C1C1C" stroke-width="0.5" opacity="0.15"/>
+  <rect x="280" y="300" width="220" height="220" fill="none" stroke="#1C1C1C" stroke-width="0.5" opacity="0.15"/>
+  <rect x="500" y="300" width="220" height="220" fill="none" stroke="#1C1C1C" stroke-width="0.5" opacity="0.15"/>
+  <text x="400" y="575" font-family="-apple-system, sans-serif" font-size="12" fill="rgba(28,28,28,0.3)" text-anchor="middle" letter-spacing="0.1em">FLOOR PLAN — OSNOVA</text>
+</svg>

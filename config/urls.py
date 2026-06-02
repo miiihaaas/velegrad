@@ -11,10 +11,18 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 
+from pages.views import HomeView
+
 urlpatterns = [
+    # Minimalna javna home ruta (Story 2.1, AC7) — renderuje bazni layout.
+    path("", HomeView.as_view(), name="home"),
     path(f"{settings.ADMIN_URL}/", admin.site.urls),
     # TinyMCE asset/spellcheck/filebrowser routes (Story 1.4 AC2). 5.0.0 has
     # app_name=None -> no "tinymce:" namespace; routes are tinymce-compressor /
     # tinymce-filebrowser / tinymce-linklist.
     path("tinymce/", include("tinymce.urls")),
 ]
+
+# Eksplicitni custom 404 handler (Story 2.1, AC5) — premium 404.html unutar
+# baznog okvira sa HTTP statusom 404 (aktivno kada je DEBUG=False).
+handler404 = "pages.views.custom_404"

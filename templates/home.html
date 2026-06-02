@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% comment %}
+  Minimalni placeholder home (Story 2.1) — validira bazni layout/okvir.
+  TODO (Story 2.2): povezati Home stranicu sa bazom (Hero, Founder, Featured
+  nekretnine) i uključiti per-stranica pages/home.css preko {% block extra_css %}.
+{% endcomment %}
+
+{% block content %}
+<main>
+  <section class="container">
+    <h1>{% trans "Velegrad Estate" %}</h1>
+    <p>{% trans "Diskrecija. Stručnost. Rezultati." %}</p>
+  </section>
+</main>
+{% endblock %}

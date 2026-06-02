@@ -1,0 +1,114 @@
+/* ============================================
+   VELEGRAD ESTATE — About / Private Advisory
+   (Dark Theme)
+   ============================================ */
+
+.about-hero {
+  padding-block-start: calc(80px + var(--space-xl));
+  padding-block-end: var(--space-xl);
+  text-align: center;
+}
+
+.about-hero h1 {
+  margin-block-end: var(--space-sm);
+}
+
+.about-hero__tagline {
+  font-family: var(--font-serif);
+  font-size: var(--text-body-lg);
+  color: var(--color-text-secondary);
+  max-width: 540px;
+  margin-inline: auto;
+}
+
+/* ── Full-bleed founder portrait ── */
+
+.about-portrait {
+  width: 100%;
+  max-width: var(--container-narrow);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.about-portrait__img {
+  width: 100%;
+  min-height: 50vh;
+  max-height: 70vh;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+/* ── Bio ── */
+
+.about-bio {
+  max-width: var(--container-text);
+  margin-inline: auto;
+}
+
+.about-bio p {
+  font-size: var(--text-body-lg);
+  line-height: 1.8;
+}
+
+/* ── Services ── */
+
+.services-list {
+  list-style: none;
+  padding: 0;
+  max-width: var(--container-text);
+  margin-inline: auto;
+}
+
+.services-list li {
+  padding-block: 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+  font-family: var(--font-sans);
+  font-size: var(--text-body-lg);
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.services-list li::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-champagne);
+  flex-shrink: 0;
+}
+
+/* ── Why Velegrad pillars (merged) ── */
+
+.why-pillar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 560px;
+  margin-inline: auto;
+  padding-block: var(--space-lg);
+}
+
+.why-pillar__icon {
+  width: 56px;
+  height: 56px;
+  color: var(--color-champagne);
+  margin-block-end: var(--space-md);
+}
+
+.why-pillar h2 {
+  font-size: var(--text-2xl);
+  margin-block-end: var(--space-sm);
+}
+
+.why-pillar p {
+  font-size: var(--text-body-lg);
+  line-height: 1.8;
+  color: var(--color-text-secondary);
+}
+
+.why-pillar .separator {
+  margin-block-start: var(--space-lg);
+}

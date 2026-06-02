@@ -1,0 +1,70 @@
+/* ============================================
+   VELEGRAD ESTATE — Private Collection
+   (Dark Theme)
+   ============================================ */
+
+.pc-hero {
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-block-start: calc(80px + var(--space-xl));
+  padding-block-end: var(--space-xl);
+  background-color: #141414;
+}
+
+.pc-hero h1 {
+  color: var(--color-warm-ivory);
+  margin-block-end: var(--space-sm);
+}
+
+.pc-hero__subtitle {
+  font-family: var(--font-serif);
+  font-size: var(--text-body-lg);
+  color: rgba(245, 240, 232, 0.65);
+  max-width: 560px;
+  margin-inline: auto;
+  line-height: 1.8;
+}
+
+.pc-explanation {
+  max-width: var(--container-text);
+  margin-inline: auto;
+  text-align: center;
+}
+
+.pc-explanation p {
+  font-size: var(--text-body-lg);
+  line-height: 1.8;
+}
+
+.pc-form {
+  max-width: 560px;
+  margin-inline: auto;
+}
+
+.pc-form__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-sm);
+}
+
+@media (min-width: 768px) {
+  .pc-form__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.pc-form__full {
+  grid-column: 1 / -1;
+}
+
+.pc-note {
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  font-style: italic;
+  max-width: 480px;
+  margin-inline: auto;
+}
