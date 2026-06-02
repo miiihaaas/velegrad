@@ -12,10 +12,13 @@ from django.contrib import admin
 from django.urls import include, path
 
 from pages.views import HomeView
+from properties.views import PropertyListView
 
 urlpatterns = [
     # Minimalna javna home ruta (Story 2.1, AC7) — renderuje bazni layout.
     path("", HomeView.as_view(), name="home"),
+    # Signature listing sa server-side filterima (Story 3.1).
+    path("properties/", PropertyListView.as_view(), name="properties"),
     path(f"{settings.ADMIN_URL}/", admin.site.urls),
     # TinyMCE asset/spellcheck/filebrowser routes (Story 1.4 AC2). 5.0.0 has
     # app_name=None -> no "tinymce:" namespace; routes are tinymce-compressor /

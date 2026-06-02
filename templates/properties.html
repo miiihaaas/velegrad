@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% comment %}
+  Story 3.1 — Signature listing sa server-side filterima.
+  Markup/klase iz docs/OpenDesignFiles/properties.html (filter-bar + listing-grid).
+
+  Konvencije (LOCKED):
+   - Filter-bar je umotan u <form method="get" action="">; filteri se primenjuju
+     SERVERSKI (GET reload) — radi i bez JS-a (progressive enhancement).
+   - name-ovi usklađeni sa PropertyFilterForm: location/property_type/price_min/
+     price_max/bedrooms(hidden, JS upisuje)/status/keyword. NE legacy type/price-min.
+   - Status select koristi MODEL vrednosti (for_sale/for_rent/price_on_request).
+   - filter-bar__optional checkboxovi se IZOSTAVLJAJU (nemaju mapiranje u 3.1).
+   - Kartica CTA → HARDKODOVAN /properties/{{ p.slug }}/ (detalj je 3.2; NE {% url %}).
+   - Card polja BEZ |safe (auto-escape; user/admin uneta polja).
+   - UI copy → {% trans %}. Bez fetch/XHR.
+{% endcomment %}
+
+{% block title %}{% trans "Odabrane nekretnine" %} — Velegrad Estate{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/properties.css' %}">
+{% endblock %}
+
+{% block content %}
+<main>
+
+  <!-- ════ Hero ════ -->
+  <section class="listing-hero" aria-label="{% trans 'Odabrane nekretnine hero' %}">
+    <div class="container">
+      <p class="eyebrow mb-sm">{% trans "Kolekcija" %}</p>
+      <h1>{% trans "Odabrane nekretnine" %}</h1>
+      <p class="listing-hero__intro">{% trans "Pažljivo selektovane nekretnine koje definišu vrhunski standard života u Beogradu." %}</p>
+    </div>
+  </section>
+
+  <!-- ════ Filter Bar ════ -->
+  <section class="section" style="padding-block-start: 0;" aria-label="{% trans 'Filteri' %}">
+    <div class="container">
+      <form method="get" action="">
+        <div class="filter-bar">
+          <div class="filter-bar__primary">
+            <!-- Location -->
+            <div class="form-group">
+              <label class="form-label" for="filter-location">{% trans "Lokacija" %}</label>
+              <input type="text" class="form-input" id="filter-location" name="location"
+                     value="{{ form.location.value|default:'' }}"
+                     placeholder="{% trans 'Npr. Dedinje' %}">
+            </div>
+            <!-- Type -->
+            <div class="form-group">
+              <label class="form-label" for="filter-type">{% trans "Tip nekretnine" %}</label>
+              <select class="form-select" id="filter-type" name="property_type">
+                <option value="">{% trans "Svi tipovi" %}</option>
+                {% for value, label in form.fields.property_type.choices %}
+                  {% if value %}
+                    <option value="{{ value }}"{% if form.property_type.value == value %} selected{% endif %}>{{ label }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+            <!-- Status -->
+            <div class="form-group">
+              <label class="form-label" for="filter-status">{% trans "Status" %}</label>
+              <select class="form-select" id="filter-status" name="status">
+                <option value="">{% trans "Sve" %}</option>
+                {% for value, label in form.fields.status.choices %}
+                  {% if value %}
+                    <option value="{{ value }}"{% if form.status.value == value %} selected{% endif %}>{{ label }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+            <!-- Price range slider -->
+            <div class="form-group form-group--wide">
+              <label class="form-label">{% trans "Raspon cena (€)" %}</label>
+              <div class="price-slider">
+                <div class="price-slider__track">
+                  <div class="price-slider__fill"></div>
+                  <input type="range" class="price-slider__input" name="price_min" min="0" max="5000000" step="50000" value="{{ request.GET.price_min|default:'0' }}" aria-label="{% trans 'Minimalna cena' %}">
+                  <input type="range" class="price-slider__input" name="price_max" min="0" max="5000000" step="50000" value="{{ request.GET.price_max|default:'5000000' }}" aria-label="{% trans 'Maksimalna cena' %}">
+                </div>
+                <div class="price-slider__values">
+                  <span class="price-slider__min-val">€0</span>
+                  <span class="price-slider__max-val">€5.000.000</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bedrooms -->
+          <div class="filter-bar__bedrooms">
+            <p class="filter-bar__bedrooms-label">{% trans "Spavaće sobe" %}</p>
+            <div class="chip-group">
+              <button type="button" class="chip{% if request.GET.bedrooms == '1' %} is-active{% endif %}" data-bedrooms="1">1</button>
+              <button type="button" class="chip{% if request.GET.bedrooms == '2' %} is-active{% endif %}" data-bedrooms="2">2</button>
+              <button type="button" class="chip{% if request.GET.bedrooms == '3' %} is-active{% endif %}" data-bedrooms="3">3</button>
+              <button type="button" class="chip{% if request.GET.bedrooms == '4' %} is-active{% endif %}" data-bedrooms="4">4</button>
+              <button type="button" class="chip{% if request.GET.bedrooms == '5' %} is-active{% endif %}" data-bedrooms="5">5+</button>
+            </div>
+            <input type="hidden" name="bedrooms" value="{{ form.bedrooms.value|default:'' }}">
+          </div>
+
+          <!-- Keyword -->
+          <div class="filter-bar__keyword">
+            <div class="form-group">
+              <label class="form-label" for="filter-keyword">{% trans "Ključna reč" %}</label>
+              <input type="text" class="form-input" id="filter-keyword" name="keyword"
+                     value="{{ form.keyword.value|default:'' }}"
+                     placeholder="{% trans 'Pretraga po naslovu' %}">
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="filter-bar__actions">
+            <div class="d-flex gap-sm">
+              <a href="/properties/" class="btn btn--secondary btn--sm" data-action="reset">{% trans "Resetuj filtere" %}</a>
+              <button type="submit" class="btn btn--primary btn--sm" data-action="apply">{% trans "Primeni filtere" %}</button>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <!-- Results -->
+      <p class="listing-results">{{ properties|length }} {% trans "nekretnina" %}</p>
+
+      <!-- ════ Listing Grid ════ -->
+      <div class="listing-grid">
+        {% for p in properties %}
+          <article class="property-card">
+            <div class="property-card__image">
+              {% if p.hero_image %}
+                <img src="{{ p.hero_image.url }}" alt="{{ p.title }}">
+              {% else %}
+                <img src="{% static 'images/placeholders/property-1.svg' %}" alt="">
+              {% endif %}
+              {% if p.price_on_request or p.status == "price_on_request" %}
+                <span class="badge badge--inquiry property-card__badge">{{ p.get_status_display }}</span>
+              {% elif p.status == "for_rent" %}
+                <span class="badge badge--rent property-card__badge">{{ p.get_status_display }}</span>
+              {% else %}
+                <span class="badge badge--sale property-card__badge">{{ p.get_status_display }}</span>
+              {% endif %}
+            </div>
+            <div class="property-card__body">
+              <h3 class="property-card__title">{{ p.title }}</h3>
+              <div class="property-card__meta">
+                <span>{{ p.get_property_type_display }}</span>
+                <span>{{ p.area_sqm|floatformat:0 }} m²</span>
+                <span>{{ p.bedrooms }} {% trans "soba" %}</span>
+              </div>
+              <div class="property-card__price">
+                {% if p.price_on_request or p.status == "price_on_request" %}{% trans "Cena na upit" %}{% else %}€{{ p.price|floatformat:0 }}{% endif %}
+              </div>
+              <a href="/properties/{{ p.slug }}/" class="property-card__cta">{% trans "Detaljnije" %}</a>
+            </div>
+          </article>
+        {% empty %}
+          <p class="listing-empty">{% trans "Nema nekretnina koje odgovaraju izabranim filterima." %}</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+</main>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/filters.js' %}" defer></script>
+{% endblock %}

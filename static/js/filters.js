@@ -1,5 +1,20 @@
 /* ============================================
-   VELEGRAD ESTATE — Listing Filters (client-side)
+   VELEGRAD ESTATE — Listing Filters (server-side GET)
+   --------------------------------------------
+   Story 3.1: adaptirano sa client-side hide na GET form submit (arh §1.2).
+   Filteri se primenjuju SERVERSKI — JS samo zadržava UX (price slider feedback,
+   bedrooms chip → hidden input). Forma radi i bez JS-a (progressive enhancement).
+   Bez fetch / XMLHttpRequest / XHR.
+
+   Izmene u odnosu na 2.1 kopiju (Dev Agent Record):
+     - Uklonjena client-side applyFilters()/resetFilters() hide logika
+       (style.display nad .property-card) — primarni mehanizam je GET reload.
+     - Selektori usklađeni sa novim name-ovima forme:
+         [name="price-min"]  -> [name="price_min"]
+         [name="price-max"]  -> [name="price_max"]
+         [name="type"]       -> [name="property_type"] (čita se kroz formu, nema XHR)
+     - Bedrooms chip klik upisuje vrednost u hidden <input name="bedrooms">
+       ("5+" chip ima data-bedrooms="5") i submituje formu (GET).
    ============================================ */
 
 (function () {
@@ -8,15 +23,12 @@
   var filterBar = document.querySelector('.filter-bar');
   if (!filterBar) return;
 
-  var cards = Array.from(document.querySelectorAll('.property-card[data-filter]'));
+  var form = filterBar.closest('form');
   var toggleBtn = filterBar.querySelector('.filter-bar__toggle');
   var optionalPanel = filterBar.querySelector('.filter-bar__optional');
-  var applyBtn = filterBar.querySelector('[data-action="apply"]');
-  var resetBtn = filterBar.querySelector('[data-action="reset"]');
-  var resultsEl = document.querySelector('.listing-results');
-  var emptyEl = document.querySelector('.listing-empty');
+  var bedroomsInput = filterBar.querySelector('input[type="hidden"][name="bedrooms"]');
 
-  // Toggle optional filters
+  // Toggle optional filters (zadržano za eventualni opcioni panel)
   if (toggleBtn && optionalPanel) {
     toggleBtn.addEventListener('click', function () {
       var isOpen = optionalPanel.classList.toggle('is-visible');
@@ -24,17 +36,28 @@
     });
   }
 
-  // Bedroom chips
+  // ── Bedroom chips → hidden input (GET submit) ──
   var chips = Array.from(filterBar.querySelectorAll('.chip[data-bedrooms]'));
   chips.forEach(function (chip) {
     chip.addEventListener('click', function () {
-      chip.classList.toggle('is-active');
+      var value = chip.getAttribute('data-bedrooms') || '';
+      var alreadyActive = chip.classList.contains('is-active');
+
+      chips.forEach(function (c) { c.classList.remove('is-active'); });
+
+      if (alreadyActive) {
+        // Re-klik na aktivni chip = deselekcija.
+        if (bedroomsInput) bedroomsInput.value = '';
+      } else {
+        chip.classList.add('is-active');
+        if (bedroomsInput) bedroomsInput.value = value;
+      }
     });
   });
 
-  // ── Dual range slider ──
-  var sliderMin = filterBar.querySelector('.price-slider__input[name="price-min"]');
-  var sliderMax = filterBar.querySelector('.price-slider__input[name="price-max"]');
+  // ── Dual range slider (vizuelni feedback) ──
+  var sliderMin = filterBar.querySelector('.price-slider__input[name="price_min"]');
+  var sliderMax = filterBar.querySelector('.price-slider__input[name="price_max"]');
   var sliderFill = filterBar.querySelector('.price-slider__fill');
   var minValEl = filterBar.querySelector('.price-slider__min-val');
   var maxValEl = filterBar.querySelector('.price-slider__max-val');
@@ -76,105 +99,4 @@
     sliderMax.addEventListener('input', updateSlider);
   }
   updateSlider();
-
-  function getFilters() {
-    var location = filterBar.querySelector('[name="location"]');
-    var type = filterBar.querySelector('[name="type"]');
-    var status = filterBar.querySelector('[name="status"]');
-
-    var priceMin = sliderMin ? parseInt(sliderMin.value) || 0 : 0;
-    var priceMax = sliderMax ? parseInt(sliderMax.value) || Infinity : Infinity;
-
-    var activeChips = chips.filter(function (c) { return c.classList.contains('is-active'); });
-    var bedrooms = activeChips.map(function (c) { return c.getAttribute('data-bedrooms'); });
-
-    var checkboxes = Array.from(filterBar.querySelectorAll('.filter-checkbox input:checked'));
-    var features = checkboxes.map(function (cb) { return cb.value; });
-
-    return {
-      location: location ? location.value : '',
-      type: type ? type.value : '',
-      status: status ? status.value : '',
-      priceMin: priceMin,
-      priceMax: priceMax,
-      bedrooms: bedrooms,
-      features: features
-    };
-  }
-
-  function applyFilters() {
-    var f = getFilters();
-    var visibleCount = 0;
-
-    cards.forEach(function (card) {
-      var d = card.dataset;
-      var show = true;
-
-      if (f.location && d.location !== f.location) show = false;
-      if (f.type && d.type !== f.type) show = false;
-      if (f.status && d.status !== f.status) show = false;
-
-      var price = parseInt(d.price) || 0;
-      if (price > 0) {
-        if (price < f.priceMin) show = false;
-        if (price > f.priceMax) show = false;
-      }
-
-      if (f.bedrooms.length > 0) {
-        var beds = d.bedrooms || '0';
-        var match = f.bedrooms.some(function (b) {
-          return b === '5+' ? parseInt(beds) >= 5 : beds === b;
-        });
-        if (!match) show = false;
-      }
-
-      if (f.features.length > 0) {
-        var cardFeatures = (d.features || '').split(',');
-        var allMatch = f.features.every(function (feat) {
-          return cardFeatures.indexOf(feat) !== -1;
-        });
-        if (!allMatch) show = false;
-      }
-
-      card.style.display = show ? '' : 'none';
-      if (show) visibleCount++;
-    });
-
-    if (resultsEl) {
-      resultsEl.textContent = visibleCount + ' od ' + cards.length + ' nekretnina';
-    }
-    if (emptyEl) {
-      emptyEl.style.display = visibleCount === 0 ? '' : 'none';
-    }
-  }
-
-  function resetFilters() {
-    var selects = filterBar.querySelectorAll('select');
-    selects.forEach(function (s) { s.selectedIndex = 0; });
-
-    var inputs = filterBar.querySelectorAll('input[type="text"]');
-    inputs.forEach(function (i) { i.value = ''; });
-
-    var checkboxes = filterBar.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach(function (cb) { cb.checked = false; });
-
-    chips.forEach(function (c) { c.classList.remove('is-active'); });
-
-    // Reset slider
-    if (sliderMin) sliderMin.value = sliderMin.min;
-    if (sliderMax) sliderMax.value = sliderMax.max;
-    updateSlider();
-
-    cards.forEach(function (card) { card.style.display = ''; });
-
-    if (resultsEl) {
-      resultsEl.textContent = cards.length + ' od ' + cards.length + ' nekretnina';
-    }
-    if (emptyEl) {
-      emptyEl.style.display = 'none';
-    }
-  }
-
-  if (applyBtn) applyBtn.addEventListener('click', applyFilters);
-  if (resetBtn) resetBtn.addEventListener('click', resetFilters);
 })();
