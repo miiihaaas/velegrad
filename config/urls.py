@@ -9,8 +9,12 @@ je već normalizovana (bez kose crte); Django's path() zahteva prateću kosu crt
 """
 from django.conf import settings
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 
 urlpatterns = [
     path(f"{settings.ADMIN_URL}/", admin.site.urls),
+    # TinyMCE asset/spellcheck/filebrowser routes (Story 1.4 AC2). 5.0.0 has
+    # app_name=None -> no "tinymce:" namespace; routes are tinymce-compressor /
+    # tinymce-filebrowser / tinymce-linklist.
+    path("tinymce/", include("tinymce.urls")),
 ]

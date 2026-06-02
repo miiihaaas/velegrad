@@ -52,9 +52,12 @@ if not ADMIN_URL:
 # --------------------------------------------------------------------------- #
 INSTALLED_APPS = [
     # django-unfold MUST precede django.contrib.admin so it can override the
-    # admin templates / admin site (Story 1.3 AC1). Dashboard-only scope: only
-    # the core "unfold" app is needed here (unfold.contrib.* is 1.4).
+    # admin templates / admin site (Story 1.3 AC1). Only the core "unfold" app is
+    # needed: TinyMCE is wired directly via formfield_overrides (1.4), so no
+    # unfold.contrib.* sub-app (e.g. unfold.contrib.forms' WysiwygWidget) is used.
     "unfold",
+    "adminsortable2",
+    "tinymce",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -151,6 +154,12 @@ MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Forward-compat (Django 6.0): forms.URLField will default to assuming 'https'.
+# Opting in now silences RemovedInDjango60Warning emitted when admin forms render
+# URLField inputs (e.g. virtual_tour_url, hero_video_url) and matches the future
+# default behaviour.
+FORMS_URLFIELD_ASSUME_HTTPS = True
 
 # --------------------------------------------------------------------------- #
 # django-unfold admin theme (Story 1.3)                                        #

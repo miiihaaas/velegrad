@@ -16,6 +16,8 @@ from django.contrib import admin
 from django.shortcuts import redirect
 from django.urls import reverse
 
+from tinymce.models import HTMLField
+from tinymce.widgets import TinyMCE
 from unfold.admin import ModelAdmin
 
 from core.models import SiteSettings
@@ -65,7 +67,64 @@ def dashboard_callback(request, context):
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(ModelAdmin):
-    """Singleton admin: edit only, no add (once a row exists), no delete (AC6)."""
+    """Singleton admin: edit only, no add (once a row exists), no delete (AC6).
+
+    Story 1.4 EXTENDS this with grouped SR/EN fieldsets covering the full
+    settings (FR26/FR27) and TinyMCE on founder_bio_* (AC2). The 1.3 singleton
+    rules (no add when a row exists, no delete, changelist->change redirect) are
+    NOT touched.
+    """
+
+    # TinyMCE WYSIWYG for the founder_bio_* HTMLFields (AC2).
+    formfield_overrides = {
+        HTMLField: {"widget": TinyMCE},
+    }
+
+    fieldsets = (
+        (
+            "Kontakt",
+            {
+                "fields": (
+                    "phone_primary",
+                    "whatsapp_number",
+                    "email_primary",
+                    "email_inquiries",
+                    "address",
+                )
+            },
+        ),
+        (
+            "Osnivač",
+            {
+                "fields": (
+                    "founder_name",
+                    ("founder_title_sr", "founder_title_en"),
+                    "founder_photo",
+                    "founder_bio_sr",
+                    "founder_bio_en",
+                )
+            },
+        ),
+        (
+            "Hero / homepage",
+            {
+                "fields": (
+                    ("hero_headline_sr", "hero_headline_en"),
+                    ("hero_cta_text_sr", "hero_cta_text_en"),
+                    "hero_image",
+                    "hero_video_url",
+                )
+            },
+        ),
+        (
+            "Analitika",
+            {"fields": ("google_analytics_id", "facebook_pixel_id")},
+        ),
+        (
+            "SEO",
+            {"fields": ("seo_default_title", "seo_default_description")},
+        ),
+    )
 
     def has_add_permission(self, request):
         # Allowed only on a completely empty DB; blocked once the singleton row
