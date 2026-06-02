@@ -51,6 +51,10 @@ if not ADMIN_URL:
 # Applications                                                                 #
 # --------------------------------------------------------------------------- #
 INSTALLED_APPS = [
+    # django-unfold MUST precede django.contrib.admin so it can override the
+    # admin templates / admin site (Story 1.3 AC1). Dashboard-only scope: only
+    # the core "unfold" app is needed here (unfold.contrib.* is 1.4).
+    "unfold",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -147,3 +151,73 @@ MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# --------------------------------------------------------------------------- #
+# django-unfold admin theme (Story 1.3)                                        #
+# --------------------------------------------------------------------------- #
+# Brand colors from the design tokens (zadatak §2.2, tokens.css):
+#   Deep Olive  #4A5240  -> RGB-channel "74 82 64"  (primary, brand center)
+#   Champagne   #C9A96E  -> RGB-channel "201 169 110" (secondary / accent)
+# Modern django-unfold expects COLORS as shade scales (keys 50-950) whose values
+# are space-separated RGB-channel strings, NOT hex. Shades are derived around the
+# brand tone (lighter -> darker).
+UNFOLD = {
+    "SITE_TITLE": "Velegrad CMS",
+    "SITE_HEADER": "Velegrad CMS",
+    "SITE_SUBHEADER": "Administracija",
+    # TODO: zameniti tekstualni brending klijentskim SVG logom (IR #4) kad stigne.
+    "DASHBOARD_CALLBACK": "core.admin.dashboard_callback",
+    "COLORS": {
+        # Deep Olive primary scale (#4A5240 = "74 82 64" at the center).
+        "primary": {
+            "50": "242 243 240",
+            "100": "224 227 219",
+            "200": "197 202 186",
+            "300": "162 170 147",
+            "400": "120 130 104",
+            "500": "74 82 64",
+            "600": "74 82 64",
+            "700": "60 67 52",
+            "800": "48 53 42",
+            "900": "39 43 34",
+            "950": "23 26 20",
+        },
+        # Champagne secondary / accent scale (#C9A96E = "201 169 110").
+        "secondary": {
+            "50": "250 246 239",
+            "100": "244 236 222",
+            "200": "233 217 191",
+            "300": "221 196 156",
+            "400": "201 169 110",
+            "500": "201 169 110",
+            "600": "181 148 88",
+            "700": "151 121 70",
+            "800": "122 98 59",
+            "900": "100 81 50",
+            "950": "54 43 26",
+        },
+    },
+}
+
+# NO-OP belt-and-suspenders guard (verified against django-unfold 0.95.0).
+#
+# Unfold's ``get_config`` builds the live theme by deep-merging UNFOLD over
+# CONFIG_DEFAULTS via ``merge_dicts``, which DEEP-COPIES every leaf — so the
+# normalization of COLORS channel strings (e.g. "201 169 110" -> "rgb(201, 169,
+# 110)") happens on the merged COPY and never touches ``settings.UNFOLD``. In
+# 0.95.0 ``secondary`` is ALSO already a key in CONFIG_DEFAULTS["COLORS"], so the
+# setdefault() calls below are redundant on both counts.
+#
+# We keep this loop purely as a forward-compatibility guard: were a FUTURE Unfold
+# to stop deep-copying (returning live references to our scale dicts), pre-seeding
+# every custom scale key as an empty dict in the defaults would force the merge to
+# recurse and produce a fresh copy, keeping ``settings.UNFOLD`` pristine. It is
+# NOT load-bearing today. Best-effort: never fail settings import if Unfold's
+# internals change. (Regression covered in tests/test_admin_dashboard.py.)
+try:  # pragma: no cover - defensive guard around a 3rd-party internal
+    from unfold import settings as _unfold_settings
+
+    for _scale_name in UNFOLD["COLORS"]:
+        _unfold_settings.CONFIG_DEFAULTS["COLORS"].setdefault(_scale_name, {})
+except Exception:  # pragma: no cover
+    pass
