@@ -400,8 +400,22 @@ def test_base_contains_architecture_runtime_packages():
 # =========================================================================== #
 def test_databases_configured_for_postgresql():
     # AC6: DATABASES['default'] must use the postgresql engine (from DATABASE_URL).
-    settings = _configured_django("dev")
-    engine = settings.DATABASES["default"]["ENGINE"]
+    #
+    # TEST_MODIFICATION (Story 1.2): this test originally read the engine from the
+    # LIVE configured Django settings via `_configured_django("dev")`. Story 1.2
+    # activates pytest-django with `DJANGO_SETTINGS_MODULE = config.settings.test`
+    # (a SQLite override of base, required because no Postgres is available for the
+    # new @django_db model tests). Under that activation the LIVE `settings.DATABASES`
+    # is the SQLite test override, so reading it here is the WRONG source of truth
+    # for this AC. The INTENT of AC6 is unchanged: the PROJECT's real database
+    # (base/dev) must be PostgreSQL, built from DATABASE_URL. We therefore read the
+    # engine from the freshly-imported `config.settings.base` module — base.py
+    # evaluates `env.db("DATABASE_URL")` at import time against the repo `.env`
+    # (which holds a `postgres://...` URL), so its DATABASES["default"]["ENGINE"]
+    # is the genuine project engine, independent of the test-run override. This
+    # preserves exactly what the test verified before (base => postgresql).
+    base = _import_settings("base")
+    engine = base.DATABASES["default"]["ENGINE"]
     assert "postgresql" in engine, (
         f"DATABASES default ENGINE must be postgresql, got {engine!r}"
     )

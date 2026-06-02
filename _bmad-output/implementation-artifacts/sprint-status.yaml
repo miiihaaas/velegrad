@@ -51,7 +51,7 @@ development_status:
   # ---- Epic 1: Setup, CMS modeli i brendiran admin (Faza 1) ----
   epic-1: in-progress
   1-1-inicijalizacija-django-projekta-i-okruzenja: done
-  1-2-cms-modeli-i-migracije: backlog
+  1-2-cms-modeli-i-migracije: done
   1-3-brendiran-admin-i-dashboard: backlog
   1-4-admin-upravljanje-nekretninama-upitima-i-podesavanjima: backlog
   epic-1-retrospective: optional
