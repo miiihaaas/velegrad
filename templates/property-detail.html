@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+{% load static i18n l10n %}
+
+{% comment %}
+  Story 3.2 — Property Detail stranica + agent-contact mini Inquiry(viewing) forma.
+  Markup/klase iz docs/OpenDesignFiles/property-detail.html (85–307 + lightbox 371–376).
+
+  Konvencije (LOCKED):
+   - {% extends "base.html" %}; sadržaj iz baze kroz _sr polja / display metode.
+   - |safe SAMO na description_sr (admin-curated HTMLField). Sve ostalo auto-escape.
+   - Inquiry forma: pravi nativni POST (method="post" + {% csrf_token %}); BEZ
+     data-validate (forms.js hijack zamka) i BEZ učitavanja js/forms.js.
+   - TAČNO JEDNO submit dugme ("Zakažite privatnu prezentaciju"); "konsultacija"
+     dugme uklonjeno (Epik 4.2).
+   - Honeypot polje `website` skriveno preko .sr-only + aria-hidden/tabindex=-1.
+   - Mapa: SAMO kad show_map (lat+lng+show_address); init guard `typeof L`.
+   - {% loc %} NE postoji (Epik 6) — direktno _sr.
+{% endcomment %}
+
+{% block title %}{{ property.title }} — Velegrad Estate{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/property-detail.css' %}">
+  {# Leaflet (eksterna mrežna zavisnost — CDN; init je guardovan typeof L).
+     S3: SRI integrity + crossorigin/referrerpolicy hardening (Leaflet 1.9.4).
+     TODO (pre-production, arhitektura §4): vendoring u static/vendor/leaflet/. #}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+{% endblock %}
+
+{% block content %}
+<main>
+
+  <!-- ════ Block 1 — Hero Gallery ════ -->
+  <section class="detail-hero" aria-label="{% trans 'Galerija fotografija' %}">
+    <img src="{% if property.hero_image %}{{ property.hero_image.url }}{% else %}{% static 'images/placeholders/property-1.svg' %}{% endif %}"
+         alt="{{ property.title }}">
+    {# S2: virtual_tour_url je sanitizovan u view-u (samo http/https; javascript:/data: -> "") #}
+    {% if virtual_tour_url %}
+      <div class="detail-hero__virtual-tour">
+        <a href="{{ virtual_tour_url }}" class="btn btn--light btn--sm"
+           target="_blank" rel="noopener" aria-label="{% trans 'Virtuelna tura' %}">{% trans "Virtuelna tura" %}</a>
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- Thumbnails -->
+  {% if images %}
+    <div class="detail-thumbnails">
+      <div class="thumbnail-strip" role="list" aria-label="{% trans 'Galerija thumbnails' %}">
+        {% for img in images %}
+          <div class="thumbnail-strip__item{% if forloop.first %} is-active{% endif %}" role="listitem">
+            <img src="{{ img.image.url }}" data-full="{{ img.image.url }}"
+                 alt="{{ img.caption|default:property.title }}">
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- ════ Block 2 + 3 — Info + Description ════ -->
+  <section class="section" aria-label="{% trans 'Detalji nekretnine' %}">
+    <div class="container">
+      <div class="detail-layout">
+
+        <!-- Main content -->
+        <div>
+          <!-- Block 3 — Premium Description -->
+          <div class="detail-description fade-in-section">
+            <p class="eyebrow mb-md">{{ property.get_property_type_display }} — {{ property.location_district }}, {{ property.location_city }}</p>
+            <h2 class="mb-md">{{ property.title }}</h2>
+            {# |safe opravdan: description_sr je admin-curated HTMLField (TinyMCE). #}
+            {{ property.description_sr|safe }}
+          </div>
+
+          <!-- Block 4 — Features / Amenities -->
+          {% if features %}
+            <div class="fade-in-section mt-xl">
+              <h2 class="mb-md">{% trans "Karakteristike" %}</h2>
+              <div class="amenity-grid">
+                {% for f in features %}
+                  <div class="amenity-item" data-icon="{{ f.icon }}">
+                    {# f.icon je CharField (icon slug/CSS klasa) — render-uje se kao klasa
+                       (auto-escape, BEZ |safe) + data-icon da različite karakteristike
+                       budu razlikovne i hookable za icon sistem. Placeholder SVG ostaje
+                       jer dizajn koristi per-amenity inline SVG bez čistog name->path mapiranja. #}
+                    <svg class="amenity-item__icon icon-{{ f.icon }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3m0 12v3M3 12h3m12 0h3"/></svg>
+                    {{ f.name_sr }}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          <!-- Block 5 — Floor Plan -->
+          {% if property.floor_plan %}
+            <div class="detail-floorplan fade-in-section mt-xl">
+              <h2 class="mb-md">{% trans "Osnova" %}</h2>
+              <a href="{{ property.floor_plan.url }}" class="btn btn--secondary btn--sm mt-md"
+                 target="_blank" rel="noopener">{% trans "Preuzmi floor plan" %}</a>
+            </div>
+          {% endif %}
+
+          <!-- Block 6 — Map -->
+          <div class="fade-in-section mt-xl">
+            <h2 class="mb-md">{% trans "Lokacija" %}</h2>
+            {% if show_map %}
+              <div id="property-map" class="map-placeholder"
+                   data-lat="{{ property.latitude|unlocalize }}" data-lng="{{ property.longitude|unlocalize }}"
+                   role="img" aria-label="{% trans 'Mapa lokacije' %}"></div>
+              {% if property.show_address and property.location_address %}
+                <p class="text-muted mt-sm" style="font-size: var(--text-sm);">{{ property.location_address }}, {{ property.location_district }}, {{ property.location_city }}</p>
+              {% endif %}
+            {% else %}
+              <p class="text-muted mt-sm" style="font-size: var(--text-sm);">{{ property.location_district }}, {{ property.location_city }} — {% trans "tačna adresa dostupna na upit" %}</p>
+            {% endif %}
+          </div>
+
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="detail-sidebar">
+          {% if property.price_on_request or property.status == "price_on_request" %}
+            <span class="badge badge--inquiry mb-sm">{{ property.get_status_display }}</span>
+          {% elif property.status == "for_rent" %}
+            <span class="badge badge--rent mb-sm">{{ property.get_status_display }}</span>
+          {% else %}
+            <span class="badge badge--sale mb-sm">{{ property.get_status_display }}</span>
+          {% endif %}
+          <h2 class="detail-sidebar__title">{{ property.title }}</h2>
+          <p class="detail-sidebar__location">{{ property.location_district }}, {{ property.location_city }}</p>
+          <div class="detail-sidebar__price">
+            {% if property.price_on_request or property.status == "price_on_request" %}{% trans "Cena na upit" %}{% else %}€{{ property.price|floatformat:0 }}{% endif %}
+          </div>
+
+          <div class="def-table">
+            <div class="def-table__row">
+              <span class="def-table__label">{% trans "Tip" %}</span>
+              <span class="def-table__value">{{ property.get_property_type_display }}</span>
+            </div>
+            <div class="def-table__row">
+              <span class="def-table__label">{% trans "Stambena površina" %}</span>
+              <span class="def-table__value">{{ property.area_sqm|floatformat:0 }} m²</span>
+            </div>
+            <div class="def-table__row">
+              <span class="def-table__label">{% trans "Ukupna površina" %}</span>
+              <span class="def-table__value">{{ property.area_total_sqm|floatformat:0 }} m²</span>
+            </div>
+            <div class="def-table__row">
+              <span class="def-table__label">{% trans "Spavaće sobe" %}</span>
+              <span class="def-table__value">{{ property.bedrooms }}</span>
+            </div>
+            <div class="def-table__row">
+              <span class="def-table__label">{% trans "Kupatila" %}</span>
+              <span class="def-table__value">{{ property.bathrooms }}</span>
+            </div>
+            <div class="def-table__row">
+              <span class="def-table__label">{% trans "Garažna mesta" %}</span>
+              <span class="def-table__value">{{ property.parking_spaces }}</span>
+            </div>
+            <div class="def-table__row">
+              <span class="def-table__label">{% trans "Sprat" %}</span>
+              <span class="def-table__value">{{ property.floor }} / {{ property.total_floors }}</span>
+            </div>
+            {% if property.year_built %}
+              <div class="def-table__row">
+                <span class="def-table__label">{% trans "Godina gradnje" %}</span>
+                <span class="def-table__value">{{ property.year_built }}</span>
+              </div>
+            {% endif %}
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ Block 7 — Agent Contact ════ -->
+  <section class="section section--ivory fade-in-section" aria-label="{% trans 'Kontakt agent' %}">
+    <div class="container">
+      <div class="agent-block" style="max-width: 760px;">
+        <div class="agent-block__header">
+          {% if site_settings.founder_photo %}
+            <div class="agent-block__avatar">
+              <img src="{{ site_settings.founder_photo.url }}" alt="{{ site_settings.founder_name }}">
+            </div>
+          {% else %}
+            <div class="agent-block__avatar" aria-hidden="true">{{ site_settings.founder_name|slice:":2"|upper }}</div>
+          {% endif %}
+          <div class="agent-block__info">
+            <h3>{{ site_settings.founder_name }}</h3>
+            <p>{{ site_settings.founder_title_sr }}</p>
+          </div>
+        </div>
+
+        <div class="agent-block__links">
+          {% if site_settings.phone_primary %}
+            <a href="tel:{{ site_settings.phone_primary }}" class="btn btn--primary btn--sm">{% trans "Pozovi direktno" %}</a>
+          {% endif %}
+          {% if site_settings.whatsapp_number %}
+            <a href="https://wa.me/{{ site_settings.whatsapp_number }}" class="btn btn--champagne btn--sm" target="_blank" rel="noopener">WhatsApp</a>
+          {% endif %}
+          {% if site_settings.email_primary %}
+            <a href="mailto:{{ site_settings.email_primary }}" class="btn btn--secondary btn--sm">Email</a>
+          {% endif %}
+        </div>
+
+        {% if request.GET.sent %}
+          <div class="form-success">{% trans "Hvala. Kontaktiraćemo Vas u najkraćem mogućem roku." %}</div>
+        {% endif %}
+
+        {# Pravi nativni POST: BEZ data-validate, forms.js se NE učitava. #}
+        <form method="post" action="" class="agent-block__form">
+          {% csrf_token %}
+          {# Honeypot — skriveno polje; bot ga popuni -> tihi reject (view). #}
+          <div class="sr-only" aria-hidden="true">
+            <label for="id_website">{% trans "Sajt (ostavite prazno)" %}</label>
+            {{ form.website }}
+          </div>
+          <div class="agent-block__form-row">
+            <div class="form-group">
+              <label class="form-label" for="{{ form.name.id_for_label }}">{% trans "Ime" %}</label>
+              {{ form.name }}
+              {{ form.name.errors }}
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="{{ form.phone.id_for_label }}">{% trans "Telefon" %}</label>
+              {{ form.phone }}
+              {{ form.phone.errors }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.email.id_for_label }}">Email</label>
+            {{ form.email }}
+            {{ form.email.errors }}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.message.id_for_label }}">{% trans "Poruka" %}</label>
+            {{ form.message }}
+            {{ form.message.errors }}
+          </div>
+          <div class="agent-block__ctas">
+            <button type="submit" class="btn btn--primary">{% trans "Zakažite privatnu prezentaciju" %}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ════ Lightbox ════ -->
+<div class="lightbox" role="dialog" aria-label="{% trans 'Galerija fotografija' %}" aria-modal="true">
+  <button class="lightbox__close" aria-label="{% trans 'Zatvori galeriju' %}">&times;</button>
+  <button class="lightbox__nav lightbox__prev" aria-label="{% trans 'Prethodna fotografija' %}">&#8249;</button>
+  <img class="lightbox__img" src="" alt="">
+  <button class="lightbox__nav lightbox__next" aria-label="{% trans 'Sledeća fotografija' %}">&#8250;</button>
+  <div class="lightbox__counter"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  {# SAMO gallery.js + Leaflet — NIKAD js/forms.js (hijack zamka). #}
+  <script src="{% static 'js/gallery.js' %}" defer></script>
+  {# S3: SRI integrity + crossorigin/referrerpolicy hardening (Leaflet 1.9.4). #}
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var el = document.getElementById('property-map');
+      // Guard MORA uključiti typeof L (blokiran/offline Leaflet -> nema ReferenceError).
+      if (typeof L !== 'undefined' && el && el.dataset.lat && el.dataset.lng) {
+        var lat = parseFloat(el.dataset.lat);
+        var lng = parseFloat(el.dataset.lng);
+        var map = L.map(el).setView([lat, lng], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+        L.marker([lat, lng]).addTo(map);
+      }
+    });
+  </script>
+{% endblock %}

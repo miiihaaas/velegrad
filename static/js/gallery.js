@@ -98,4 +98,27 @@
     if (e.key === 'ArrowRight') nextImage();
     if (e.key === 'ArrowLeft') prevImage();
   });
+
+  // Touch swipe (Story 3.2, FR10/NFR-2): swipe left -> next, right -> prev.
+  // A minimal touchstart/touchend delta on the lightbox; threshold avoids taps.
+  var touchStartX = null;
+  var SWIPE_THRESHOLD = 40;
+  lightbox.addEventListener('touchstart', function (e) {
+    if (e.changedTouches && e.changedTouches.length) {
+      touchStartX = e.changedTouches[0].clientX;
+    }
+  }, { passive: true });
+  lightbox.addEventListener('touchend', function (e) {
+    if (touchStartX === null) return;
+    var endX = (e.changedTouches && e.changedTouches.length)
+      ? e.changedTouches[0].clientX
+      : touchStartX;
+    var delta = endX - touchStartX;
+    if (delta < -SWIPE_THRESHOLD) {
+      nextImage();
+    } else if (delta > SWIPE_THRESHOLD) {
+      prevImage();
+    }
+    touchStartX = null;
+  }, { passive: true });
 })();

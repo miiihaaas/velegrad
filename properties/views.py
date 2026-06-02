@@ -18,10 +18,17 @@ Invarijante (LOCKED):
     filteri i dalje rade. Nevalidan ulaz → 200, nikad 500.
 """
 from django.db.models import Q
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views import View
 from django.views.generic import ListView
+
+from inquiries.forms import InquiryForm
+from inquiries.services import create_inquiry
 
 from .forms import PropertyFilterForm
 from .models import Property
+from .preview import can_preview
 
 
 class PropertyListView(ListView):
@@ -101,3 +108,86 @@ class PropertyListView(ListView):
         context = super().get_context_data(**kwargs)
         context["form"] = self.get_filter_form()
         return context
+
+
+class PropertyDetailView(View):
+    """Public Property Detail page + agent-contact mini Inquiry(viewing) form.
+
+    GET resolves via ``get_object_or_404(Property, slug=...)`` then ``can_preview``
+    gating (404 for missing / inactive-to-public; staff ``?preview=1`` -> 200).
+    POST handles ``InquiryForm`` — the FIRST DB write — with CSRF (Django default),
+    a honeypot, server-side fields, and PRG (POST-redirect-GET to ``?sent=1``).
+
+    Security invariants (LOCKED — story 3.2 AC6):
+      * ``inquiry_type``/``property``/``status``/``preferred_language`` are set
+        SERVER-SIDE (never from POST — those are not InquiryForm fields).
+      * a filled honeypot ``website`` -> NO row, but the SAME 302 success branch
+        as a real submit (the bot sees "success", learns nothing).
+      * NO email send (deferred to 5.2).
+    """
+
+    template_name = "property-detail.html"
+
+    def _get_object(self, request, slug):
+        # prefetch images + features to collapse the 2 extra queries the detail
+        # template triggers (obj.images.all / obj.features.all). Gating below is
+        # unchanged (still get_object_or_404 + can_preview).
+        obj = get_object_or_404(
+            Property.objects.prefetch_related("images", "features"), slug=slug
+        )
+        # Gating is by is_active / preview — NOT by collection_type.
+        if not can_preview(request, obj):
+            raise Http404("Property not visible.")
+        return obj
+
+    def _build_context(self, obj, form):
+        # Defense-in-depth (S2): only expose virtual_tour_url when it is a safe
+        # http(s) scheme. Django auto-escape does NOT neutralize a `javascript:`
+        # / `data:` scheme inside an href — an admin-entered `javascript:alert(1)`
+        # would otherwise become a clickable XSS vector. URLField does not block
+        # such schemes, so we gate the value here and the template renders the
+        # link only when this is truthy.
+        raw_tour = (obj.virtual_tour_url or "").strip()
+        safe_tour = raw_tour if raw_tour.lower().startswith(
+            ("http://", "https://")
+        ) else ""
+        return {
+            "property": obj,
+            "images": obj.images.all(),
+            "features": obj.features.all(),
+            "form": form,
+            "virtual_tour_url": safe_tour,
+            # Map renders ONLY when both coords present AND show_address is on.
+            "show_map": bool(
+                obj.latitude is not None
+                and obj.longitude is not None
+                and obj.show_address
+            ),
+        }
+
+    def get(self, request, slug):
+        obj = self._get_object(request, slug)
+        context = self._build_context(obj, InquiryForm())
+        return render(request, self.template_name, context)
+
+    def post(self, request, slug):
+        obj = self._get_object(request, slug)
+        form = InquiryForm(request.POST)
+        if form.is_valid():
+            # Honeypot: a filled `website` => silently drop, but return the SAME
+            # success branch as a real submit (302 -> ?sent=1) so a bot sees
+            # "success". NO row, NO disclosure.
+            if form.cleaned_data.get("website"):
+                return redirect(f"{request.path}?sent=1")
+
+            # Single reusable write seam (5.2 email hook + Epic 4/5 reuse).
+            # Server-side fields (inquiry_type/property/status/preferred_language)
+            # + ip_address are set inside create_inquiry — never from POST.
+            create_inquiry(
+                form=form, property=obj, inquiry_type="viewing", request=request
+            )
+            return redirect(f"{request.path}?sent=1")
+
+        # Invalid -> re-render (200) with bound form errors; NO row created.
+        context = self._build_context(obj, form)
+        return render(request, self.template_name, context)
