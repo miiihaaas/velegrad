@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% comment %}
+  Story 4.1 — International stranica iz CMS-a (Page slug="international").
+  Markup/klase verno docs/OpenDesignFiles/international.html (64–168).
+
+  Konvencije (LOCKED):
+   - {% extends "base.html" %}; zadržava site-header/site-footer okvir.
+   - |safe ISKLJUČIVO na page.content_sr (admin-curated TinyMCE HTMLField, intl-intro).
+   - page.title_sr → plain {{ }} auto-escape (NE |safe, NE .localized() u {{ }}).
+   - Kuriran 6-korak timeline (01–06) + tematske sekcije = STATIČKI {% trans %}
+     skelet (NE u content_sr — TinyMCE ne bi trebalo da nosi složen markup).
+   - CTA href HARDKODOVAN apsolutni "/contact/" (Contact je 4.2 — NE {% url %}).
+   - {% loc %}/.localized() u {{ }} ne postoje (Epik 6); /en/ prefiks ne postoji.
+{% endcomment %}
+
+{% block title %}{{ page.title_sr }} — Velegrad Estate{% endblock %}
+
+{% block meta_description %}
+  {% if page.meta_description %}
+  <meta name="description" content="{{ page.meta_description }}">
+  {% else %}{{ block.super }}{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/international.css' %}">
+{% endblock %}
+
+{% block content %}
+<main>
+
+  <!-- ════ Hero ════ -->
+  <section class="intl-hero" aria-label="{% trans 'Međunarodni klijenti hero' %}">
+    <div class="container">
+      <p class="eyebrow mb-sm">{% trans "Za međunarodne kupce" %}</p>
+      <h1>{{ page.title_sr }}</h1>
+      <p class="intl-hero__tagline">{% trans "Vaš vodič za kupovinu premium nekretnina u Beogradu, Srbija." %}</p>
+    </div>
+  </section>
+
+  <!-- ════ Uvod (admin-curated content_sr) ════ -->
+  <section class="section fade-in-section" aria-label="{% trans 'Uvod' %}" style="padding-block-start: 0;">
+    <div class="container intl-intro">
+      {{ page.content_sr|safe }}
+    </div>
+  </section>
+
+  <!-- ════ Proces kupovine — timeline (statički skelet 01–06) ════ -->
+  <section class="section section--ivory fade-in-section" aria-label="{% trans 'Proces kupovine' %}">
+    <div class="container">
+      <div class="text-center mb-xl">
+        <p class="eyebrow mb-sm">{% trans "Korak po korak" %}</p>
+        <h2>{% trans "Proces kupovine za strane državljane" %}</h2>
+      </div>
+      <div class="timeline container--narrow" style="margin-inline: auto;">
+        <div class="timeline__step">
+          <div class="timeline__number">01</div>
+          <div class="timeline__content">
+            <h3>{% trans "Inicijalna konsultacija" %}</h3>
+            <p class="text-muted">{% trans "Razumevanje Vaših potreba, budžeta i vremenskog okvira. Definisanje kriterijuma pretrage i predstavljanje mogućnosti na beogradskom tržištu." %}</p>
+          </div>
+        </div>
+        <div class="timeline__step">
+          <div class="timeline__number">02</div>
+          <div class="timeline__content">
+            <h3>{% trans "Identifikacija nekretnine" %}</h3>
+            <p class="text-muted">{% trans "Pažljiva selekcija nekretnina koje odgovaraju Vašim kriterijumima. Organizovanje privatnih obilazaka — lično ili putem video prezentacije." %}</p>
+          </div>
+        </div>
+        <div class="timeline__step">
+          <div class="timeline__number">03</div>
+          <div class="timeline__content">
+            <h3>{% trans "Due diligence i pravna provera" %}</h3>
+            <p class="text-muted">{% trans "Kompletna provera pravnog statusa nekretnine, vlasničke dokumentacije, urbanističkih dozvola i eventualnih tereta. Saradnja sa proverenim pravnim timom." %}</p>
+          </div>
+        </div>
+        <div class="timeline__step">
+          <div class="timeline__number">04</div>
+          <div class="timeline__content">
+            <h3>{% trans "Pregovaranje uslova" %}</h3>
+            <p class="text-muted">{% trans "Zastupamo Vaše interese u pregovorima o ceni, uslovima plaćanja i rokovima. Cilj je uvek optimalan dogovor za našeg klijenta." %}</p>
+          </div>
+        </div>
+        <div class="timeline__step">
+          <div class="timeline__number">05</div>
+          <div class="timeline__content">
+            <h3>{% trans "Notarska overa i registracija" %}</h3>
+            <p class="text-muted">{% trans "Priprema i potpisivanje ugovora kod javnog beležnika. Registracija vlasništva u katastru nepokretnosti. Kompletna administrativna podrška." %}</p>
+          </div>
+        </div>
+        <div class="timeline__step">
+          <div class="timeline__number">06</div>
+          <div class="timeline__content">
+            <h3>{% trans "Predaja ključeva i podrška nakon kupovine" %}</h3>
+            <p class="text-muted">{% trans "Finalna inspekcija, primopredaja nekretnine i nastavak saradnje za sve što Vam je potrebno nakon kupovine — od renoviranja do upravljanja imovinom." %}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ Pravni okvir ════ -->
+  <section class="section fade-in-section" aria-label="{% trans 'Pravni okvir' %}">
+    <div class="container intl-legal">
+      <p class="eyebrow mb-md">{% trans "Osnove" %}</p>
+      <h2 class="mb-md">{% trans "Pravni okvir" %}</h2>
+      <p>{% trans "Strani državljani u Srbiji mogu kupiti nekretnine pod uslovom reciprociteta — što znači da državljani zemalja koje omogućavaju srpskim građanima kupovinu imaju ista prava. Ovo uključuje većinu EU država, Ujedinjeno Kraljevstvo i mnoge druge jurisdikcije. Postupak je transparentan i regulisan Zakonom o osnovama svojinskopravnih odnosa." %}</p>
+      <p>{% trans "Napomena: ovo nije pravni savet. Za specifične situacije, obezbeđujemo konsultacije sa proverenim pravnim ekspertima specijalizovanim za strano vlasništvo nad nekretninama u Srbiji." %}</p>
+    </div>
+  </section>
+
+  <!-- ════ Bankarstvo i finansiranje ════ -->
+  <section class="section section--ivory fade-in-section" aria-label="{% trans 'Bankarstvo' %}">
+    <div class="container intl-legal">
+      <p class="eyebrow mb-md">{% trans "Finansije" %}</p>
+      <h2 class="mb-md">{% trans "Bankarstvo i finansiranje" %}</h2>
+      <p>{% trans "Srbija nudi relativno otvoreno bankarsko okruženje za strane investitore. Otvaranje računa je moguće za nerezidente, a nekoliko banaka nudi hipotekarne kredite za strane kupce. Transakcije se najčešće obavljaju u evrima, što eliminiše devizni rizik za većinu evropskih kupaca." %}</p>
+    </div>
+  </section>
+
+  <!-- ════ Servis preseljenja ════ -->
+  <section class="section fade-in-section" aria-label="{% trans 'Relokacija' %}">
+    <div class="container intl-legal">
+      <p class="eyebrow mb-md">{% trans "Opciono" %}</p>
+      <h2 class="mb-md">{% trans "Servis preseljenja" %}</h2>
+      <p>{% trans "Za klijente koji planiraju preseljenje u Beograd, možemo koordinirati kompletnu logistiku — od pronalaženja privremenog smeštaja i upisa dece u škole, do otvaranja bankovnog računa i povezivanja sa lokalnom zajednicom ekspata." %}</p>
+    </div>
+  </section>
+
+  <!-- ════ CTA ════ -->
+  <section class="section section--olive fade-in-section" aria-label="{% trans 'Poziv na akciju' %}">
+    <div class="container text-center">
+      <h2 class="mb-sm" style="color: var(--color-warm-ivory);">{% trans "Zakažite konsultaciju" %}</h2>
+      <p style="color: rgba(245,240,232,0.75); max-width: 480px; margin-inline: auto;" class="mb-md">{% trans "Dozvolite nam da Vas provedemo kroz proces sticanja premium nekretnine u Beogradu." %}</p>
+      {# Contact ruta je Story 4.2 — hardkodovan apsolutni href, NE {% url 'contact' %}. #}
+      <a href="/contact/" class="btn btn--ghost btn--lg">{% trans "Zakažite konsultaciju" %}</a>
+    </div>
+  </section>
+
+</main>
+{% endblock %}

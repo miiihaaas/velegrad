@@ -5,10 +5,12 @@ Minimalna home ruta renderuje bazni layout (templates/home.html koji
 custom_404 je eksplicitni handler404 koji renderuje premium 404.html unutar
 baznog okvira (site-header/site-footer) sa HTTP statusom 404.
 """
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.views.generic import TemplateView
 
 from properties.models import Property
+
+from .models import Page
 
 
 class HomeView(TemplateView):
@@ -29,3 +31,17 @@ class HomeView(TemplateView):
 
 def custom_404(request, exception):
     return render(request, "404.html", status=404)
+
+
+def page_view(request, slug, template_name):
+    """Tanak CMS page view (Story 4.1).
+
+    Razrešava Page po fiksnom slug-u (prosleđenom kao kwarg iz eksplicitne rute)
+    sa is_active=True gating-om U upitu: nepostojeći ILI is_active=False slug → 404
+    (Page NEMA preview polje — gating je čist is_active, ne can_preview). Rute su
+    FIKSNE (/about/, /international/) bez <slug> segmenta, pa slug i template_name
+    dolaze kao argumenti rute. site_settings je već globalno dostupan preko
+    core.context_processors.site_settings (2.2) — NE re-load-uje se ovde.
+    """
+    page = get_object_or_404(Page, slug=slug, is_active=True)
+    return render(request, template_name, {"page": page})

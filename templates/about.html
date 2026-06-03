@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% comment %}
+  Story 4.1 — About stranica iz CMS-a (Page slug="about") + SiteSettings founder.
+  Markup/klase verno docs/OpenDesignFiles/about.html (64–196).
+
+  Konvencije (LOCKED):
+   - {% extends "base.html" %}; zadržava site-header/site-footer okvir.
+   - |safe ISKLJUČIVO na page.content_sr (admin-curated TinyMCE HTMLField).
+   - page.title_sr / site_settings.founder_name / founder_title_sr → plain {{ }}
+     auto-escape (NE |safe, NE .localized() u {{ }}).
+   - site_settings dolazi iz core.context_processors.site_settings (2.2) — global.
+   - Statički UI skelet (services-list, why-pillar, eyebrow/h2) = {% trans %}.
+   - CTA href HARDKODOVAN apsolutni "/contact/" (Contact je 4.2 — NE {% url %}).
+   - {% loc %} ne postoji (Epik 6); /en/ prefiks ne postoji (Epik 6).
+{% endcomment %}
+
+{% block title %}{{ page.title_sr }} — Velegrad Estate{% endblock %}
+
+{% block meta_description %}
+  {% if page.meta_description %}
+  <meta name="description" content="{{ page.meta_description }}">
+  {% else %}{{ block.super }}{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/about.css' %}">
+{% endblock %}
+
+{% block content %}
+<main>
+
+  <!-- ════ Hero ════ -->
+  <section class="about-hero" aria-label="{% trans 'Privatno savetovanje hero' %}">
+    <div class="container">
+      <p class="eyebrow mb-sm">{% trans "Velegrad Estate" %}</p>
+      <h1>{{ page.title_sr }}</h1>
+      <p class="about-hero__tagline">{% trans "Privatno savetovanje za one koji očekuju izuzetnost u svakom koraku." %}</p>
+    </div>
+  </section>
+
+  <!-- ════ Portrait ════ -->
+  <section class="section fade-in-section" aria-label="{% trans 'Fotografija osnivača' %}" style="padding-block-start: 0;">
+    <div class="about-portrait">
+      {% if site_settings.founder_photo %}
+      <img class="about-portrait__img" src="{{ site_settings.founder_photo.url }}" alt="{{ site_settings.founder_name }}" width="800" height="1000">
+      {% else %}
+      <img class="about-portrait__img" src="{% static 'images/placeholders/founder-portrait.svg' %}" alt="{{ site_settings.founder_name }}" width="800" height="1000">
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- ════ Bio + filozofija (admin-curated content_sr) ════ -->
+  <section class="section fade-in-section" aria-label="{% trans 'Biografija' %}">
+    <div class="container about-bio">
+      <p class="eyebrow mb-md">{% trans "O osnivaču" %}</p>
+      {{ page.content_sr|safe }}
+      <p class="text-muted">{{ site_settings.founder_name }} — {{ site_settings.founder_title_sr }}</p>
+    </div>
+  </section>
+
+  <!-- ════ Servisi ════ -->
+  <section class="section fade-in-section" aria-label="{% trans 'Servisi' %}">
+    <div class="container">
+      <div class="text-center mb-lg">
+        <p class="eyebrow mb-sm">{% trans "Usluge" %}</p>
+        <h2>{% trans "Servisi koje nudimo" %}</h2>
+      </div>
+      <ul class="services-list">
+        <li>{% trans "Privatno savetovanje pri kupovini" %}</li>
+        <li>{% trans "Pristup off-market portfoliju" %}</li>
+        <li>{% trans "Pregovaranje u ime klijenta" %}</li>
+        <li>{% trans "Konsultacije za međunarodne kupce" %}</li>
+        <li>{% trans "Selekcija premium nekretnina" %}</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ════ Zašto Velegrad (why-pillar) ════ -->
+  <section class="section section--ivory fade-in-section" aria-label="{% trans 'Zašto Velegrad' %}">
+    <div class="container">
+      <div class="text-center mb-lg">
+        <p class="eyebrow mb-sm">{% trans "Naša razlika" %}</p>
+        <h2>{% trans "Zašto Velegrad" %}</h2>
+      </div>
+
+      <div class="why-pillar fade-in-section">
+        <svg class="why-pillar__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M24 4L20 8H8v32h32V8H28L24 4z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          <circle cx="24" cy="24" r="6" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <h2>{% trans "Diskrecija" %}</h2>
+        <p>{% trans "Svaka transakcija i svaki razgovor ostaju strogo poverljivi. Naši klijenti su ljudi koji cene privatnost iznad svega — i to je tačno ono što garantujemo. Informacije o nekretninama, pregovorima i uslovima nikada ne napuštaju okvir naše saradnje." %}</p>
+        <hr class="separator">
+      </div>
+
+      <div class="why-pillar fade-in-section">
+        <svg class="why-pillar__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M8 40L20 28l6 6 14-14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M30 20h10v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h2>{% trans "Pregovaranje" %}</h2>
+        <p>{% trans "Zastupamo isključivo Vaše interese — bez kompromisa. Naš pristup pregovaranju je metodičan i strategijski. Analiziramo tržišnu vrednost, identifikujemo pozicije prednosti i koristimo ih u Vašu korist." %}</p>
+        <hr class="separator">
+      </div>
+
+      <div class="why-pillar fade-in-section">
+        <svg class="why-pillar__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M24 6v4M24 38v4M6 24h4M38 24h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="24" cy="24" r="4" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <h2>{% trans "Premium mreža" %}</h2>
+        <p>{% trans "Pristup nekretninama koje nikada neće biti javno oglašene. Naša mreža uključuje vlasništva koja se prodaju isključivo putem privatnih kanala — od rezidencijalnih objekata na prestižnim lokacijama do investicionih prilika koje zahtevaju diskreciju." %}</p>
+        <hr class="separator">
+      </div>
+
+      <div class="why-pillar fade-in-section">
+        <svg class="why-pillar__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10 32c4-6 10-8 14-8s10 2 14 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M6 24h36" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+          <ellipse cx="24" cy="24" rx="8" ry="18" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+        </svg>
+        <h2>{% trans "Međunarodni klijenti" %}</h2>
+        <p>{% trans "Iskustvo sa kupcima i investitorima iz Francuske, Nemačke i UK. Razumemo specifične potrebe međunarodnih klijenata — od pravnog okvira za strane državljane, preko poreskih implikacija, do kompletne logistike kupovine na daljinu." %}</p>
+        <hr class="separator">
+      </div>
+
+      <div class="why-pillar fade-in-section">
+        <svg class="why-pillar__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M24 8C16 8 10 14 10 22c0 10 14 20 14 20s14-10 14-20c0-8-6-14-14-14z" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="24" cy="22" r="5" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <h2>{% trans "Lični pristup" %}</h2>
+        <p>{% trans "Radimo sa ograničenim brojem klijenata. Ovo nije ograničenje — to je filozofija. Svaki klijent dobija punu pažnju i posvećenost jednog savetnika koji poznaje vaše prioritete, vremenski okvir i kriterijume." %}</p>
+        <hr class="separator">
+      </div>
+
+      <div class="why-pillar fade-in-section">
+        <svg class="why-pillar__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="8" y="14" width="32" height="24" rx="2" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M16 14V10a8 8 0 0 1 16 0v4" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="24" cy="27" r="3" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="24" y1="30" x2="24" y2="34" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <h2>{% trans "Pouzdanost" %}</h2>
+        <p>{% trans "Dugogodišnje prisustvo na premium segmentu beogradskog tržišta. Naša reputacija je izgrađena na rezultatima — svaka uspešna transakcija je potvrda da kvalitet, integritet i stručnost nemaju alternativu." %}</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════ CTA ════ -->
+  <section class="section fade-in-section" aria-label="{% trans 'Poziv na akciju' %}">
+    <div class="container text-center">
+      <h2 class="mb-sm">{% trans "Zakažite privatnu konsultaciju" %}</h2>
+      <p class="text-muted mb-md" style="max-width: 480px; margin-inline: auto;">{% trans "Svaki razgovor započinje razumevanjem Vaših potreba i očekivanja." %}</p>
+      {# Contact ruta je Story 4.2 — hardkodovan apsolutni href, NE {% url 'contact' %}. #}
+      <a href="/contact/" class="btn btn--primary btn--lg">{% trans "Zakažite konsultaciju" %}</a>
+    </div>
+  </section>
+
+</main>
+{% endblock %}

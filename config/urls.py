@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 
-from pages.views import HomeView
+from pages.views import HomeView, page_view
 from properties.views import PropertyDetailView, PropertyListView
 
 urlpatterns = [
@@ -26,6 +26,21 @@ urlpatterns = [
         "properties/<slug:slug>/",
         PropertyDetailView.as_view(),
         name="property-detail",
+    ),
+    # CMS-driven statične stranice (Story 4.1) — EKSPLICITNE rute, BEZ root
+    # catch-all i BEZ i18n_patterns/<en/ prefiksa (Epik 6). Svaka ruta nosi svoj
+    # fiksni slug + template; page_view radi get_object_or_404(is_active=True).
+    path(
+        "about/",
+        page_view,
+        {"slug": "about", "template_name": "about.html"},
+        name="about",
+    ),
+    path(
+        "international/",
+        page_view,
+        {"slug": "international", "template_name": "international.html"},
+        name="international",
     ),
     path(f"{settings.ADMIN_URL}/", admin.site.urls),
     # TinyMCE asset/spellcheck/filebrowser routes (Story 1.4 AC2). 5.0.0 has
