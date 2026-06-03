@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% comment %}
+  Story 5.1 — Private Collection stranica (hero TAMNA pozadina + tekst objašnjenja
+  BEZ ijedne prikazane nekretnine — FR17, ovo NIJE listing) + 5-poljna intake forma
+  (name/email/phone/property_type_wanted/budget_range) → Inquiry(private_collection).
+  Markup/klase verno docs/OpenDesignFiles/private-collection.html (64–130).
+
+  Konvencije (LOCKED):
+   - {% extends "base.html" %}; zadržava site-header/site-footer okvir.
+   - Sve UI stringove preko {% trans %} (Private Collection NEMA Page red).
+   - NEMA |safe ni na jednom korisničkom polju (nema admin-curated HTMLField).
+   - Honeypot {{ form.website }} skriven CSS-om (.sr-only) — NE type="hidden".
+   - Django field imena ({{ form.property_type_wanted }}/{{ form.budget_range }}) —
+     NE dizajnova crtica-imena (property-type/budget) → POST binding + AC2.
+   - BEZ nekretnina/cena/adresa (FR17); NEMA property-card/listing-grid.
+   - loc tag ne postoji (Epik 6); /en/ prefiks ne postoji (Epik 6).
+{% endcomment %}
+
+{% block title %}{% trans "Privatna kolekcija" %} — Velegrad Estate{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/private-collection.css' %}">
+{% endblock %}
+
+{% block content %}
+<main>
+
+  <!-- ════ Hero (TAMNA pozadina) ════ -->
+  <section class="pc-hero section--dark" aria-label="{% trans 'Privatna kolekcija hero' %}">
+    <div class="container">
+      <p class="eyebrow mb-sm">{% trans "Ekskluzivno" %}</p>
+      <h1>{% trans "Privatna kolekcija" %}</h1>
+      <p class="pc-hero__subtitle">{% trans "Odabrane nekretnine nisu javno oglašene i dostupne su isključivo kvalifikovanim klijentima." %}</p>
+    </div>
+  </section>
+
+  <!-- ════ Tekst objašnjenja (BEZ nekretnina — FR17) ════ -->
+  <section class="section" aria-label="{% trans 'O privatnoj kolekciji' %}">
+    <div class="container pc-explanation">
+      <p>{% trans "Naša Privatna kolekcija obuhvata pažljivo selektovane nekretnine koje nikada nisu javno oglašene. Pristup je rezervisan za kvalifikovane klijente nakon kratkog intake procesa. Svaka nekretnina u kolekciji prolazi rigorozan selekcioni proces — od lokacije i kvaliteta gradnje do potencijala za rast vrednosti." %}</p>
+    </div>
+  </section>
+
+  <!-- ════ Intake forma ════ -->
+  <section class="section section--ivory" aria-label="{% trans 'Zahtev za pristup' %}">
+    <div class="container">
+      <div class="text-center mb-lg">
+        <p class="eyebrow mb-sm">{% trans "Pristup" %}</p>
+        <h2>{% trans "Zatražite pristup" %}</h2>
+      </div>
+
+      <div class="pc-form">
+        {% if request.GET.sent %}
+        <div class="form-success">{% trans "Hvala. Kontaktiraćemo Vas u najkraćem mogućem roku." %}</div>
+        {% endif %}
+
+        <form method="post" class="pc-form__grid">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+          <div class="form-errors pc-form__full">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="form-group">
+            <label class="form-label" for="{{ form.name.id_for_label }}">{% trans "Ime i prezime" %}</label>
+            {{ form.name }}
+            {% if form.name.errors %}<div class="form-error">{{ form.name.errors }}</div>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="{{ form.email.id_for_label }}">{% trans "Email" %}</label>
+            {{ form.email }}
+            {% if form.email.errors %}<div class="form-error">{{ form.email.errors }}</div>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="{{ form.phone.id_for_label }}">{% trans "Telefon" %}</label>
+            {{ form.phone }}
+            {% if form.phone.errors %}<div class="form-error">{{ form.phone.errors }}</div>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="{{ form.property_type_wanted.id_for_label }}">{% trans "Tip nekretnine" %}</label>
+            {{ form.property_type_wanted }}
+            {% if form.property_type_wanted.errors %}<div class="form-error">{{ form.property_type_wanted.errors }}</div>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="{{ form.budget_range.id_for_label }}">{% trans "Budžet" %}</label>
+            {{ form.budget_range }}
+            {% if form.budget_range.errors %}<div class="form-error">{{ form.budget_range.errors }}</div>{% endif %}
+          </div>
+
+          {# Honeypot — skriven CSS-om (.sr-only), NE type="hidden" (botovi preskaču type=hidden). #}
+          <div class="sr-only" aria-hidden="true">
+            <label for="{{ form.website.id_for_label }}">{% trans "Veb sajt (ostavite prazno)" %}</label>
+            {{ form.website }}
+          </div>
+
+          <div class="pc-form__full text-center mt-sm">
+            <button type="submit" class="btn btn--primary btn--lg">{% trans "Zatraži pristup" %}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+{% endblock %}

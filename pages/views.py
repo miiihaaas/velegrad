@@ -11,7 +11,7 @@ from django.views import View
 from django.views.generic import TemplateView
 from django_ratelimit.decorators import ratelimit
 
-from inquiries.forms import InquiryForm
+from inquiries.forms import InquiryForm, PrivateCollectionForm
 from inquiries.services import create_inquiry
 from properties.models import Property
 
@@ -79,6 +79,59 @@ class ContactView(View):
             # Property pa je property=None, inquiry_type="general".
             create_inquiry(
                 form=form, property=None, inquiry_type="general", request=request
+            )
+            return redirect(f"{request.path}?sent=1")  # PRG
+        # Invalid -> re-render (200) sa bound greškama; NULA redova.
+        return render(request, self.template_name, {"form": form})
+
+
+@method_decorator(
+    ratelimit(key="ip", rate="5/h", method="POST", block=True), name="post"
+)
+class PrivateCollectionView(View):
+    """Javna Private Collection stranica + 5-poljna Inquiry(private_collection)
+    intake forma (Story 5.1).
+
+    GET renderuje ``PrivateCollectionForm()`` + ``site_settings`` (već globalno
+    preko core.context_processors.site_settings — NE re-load-uje se ovde). NEMA
+    Property upita (FR17 — Private Collection NE prikazuje nekretnine; ovo NIJE
+    listing). POST verno prati 4.2 ``ContactView.post`` obrazac (honeypot/CSRF/
+    PRG/create_inquiry), ALI sa NOVOM formom, ``property=None`` +
+    ``inquiry_type="private_collection"``.
+
+    Security invariants (LOCKED — story 5.1 AC3/AC4):
+      * ``inquiry_type``/``property``/``status``/``preferred_language``/``ip_address``
+        se postavljaju SERVER-SIDE u ``create_inquiry`` — nikad iz POST-a.
+      * ``property_type_wanted``/``budget_range`` JESU form-polja (legitiman unos);
+        ``message`` ostaje ``""`` (nije form-polje → default).
+      * popunjen honeypot ``website`` -> NULA redova, ali ISTI 302 ?sent=1 success
+        branch kao realan submit.
+      * BEZ slanja email-a (odloženo za 5.2).
+      * POST je rate-limitovan na 5/h po IP-u (block=True -> Ratelimited -> 403).
+    """
+
+    template_name = "private-collection.html"
+
+    def get(self, request):
+        return render(
+            request, self.template_name, {"form": PrivateCollectionForm()}
+        )
+
+    def post(self, request):
+        form = PrivateCollectionForm(request.POST)
+        if form.is_valid():
+            # Honeypot: popunjen `website` => tiho odbaci, ali vrati ISTI success
+            # branch (302 -> ?sent=1) kao realan submit. NULA redova, NULA otkrića.
+            if form.cleaned_data.get("website"):
+                return redirect(f"{request.path}?sent=1")
+            # Jedinstveni write-seam (3.2 reuse): server-side polja + ip_address se
+            # postavljaju unutar create_inquiry — nikad iz POST-a. Private Collection
+            # nema konkretnu nekretninu pa je property=None, inquiry_type="private_collection".
+            create_inquiry(
+                form=form,
+                property=None,
+                inquiry_type="private_collection",
+                request=request,
             )
             return redirect(f"{request.path}?sent=1")  # PRG
         # Invalid -> re-render (200) sa bound greškama; NULA redova.

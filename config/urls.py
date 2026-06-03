@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 
-from pages.views import ContactView, HomeView, page_view
+from pages.views import ContactView, HomeView, PrivateCollectionView, page_view
 from properties.views import PropertyDetailView, PropertyListView
 
 urlpatterns = [
@@ -46,6 +46,14 @@ urlpatterns = [
     # i18n_patterns/<en/ prefiksa (Epik 6). Contact je CBV (kao Home/PropertyDetail).
     # Oživljava /contact/ koju 4.1 About/International CTA hardkodovano cilja.
     path("contact/", ContactView.as_view(), name="contact"),
+    # Private Collection stranica (Story 5.1) — EKSPLICITNA ruta, BEZ root
+    # catch-all i BEZ i18n_patterns/<en/ prefiksa (Epik 6). Oživljava
+    # /private-collection/ koju 2.2 Home teaser hardkodovano cilja (200 umesto 404).
+    path(
+        "private-collection/",
+        PrivateCollectionView.as_view(),
+        name="private-collection",
+    ),
     path(f"{settings.ADMIN_URL}/", admin.site.urls),
     # TinyMCE asset/spellcheck/filebrowser routes (Story 1.4 AC2). 5.0.0 has
     # app_name=None -> no "tinymce:" namespace; routes are tinymce-compressor /
