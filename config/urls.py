@@ -10,10 +10,16 @@ je već normalizovana (bez kose crte); Django's path() zahteva prateću kosu crt
 from django.conf import settings
 from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path, register_converter
+from django.views.generic import TemplateView
 
+from core.sitemaps import PageSitemap, PropertySitemap
 from pages.views import ContactView, HomeView, PrivateCollectionView, page_view
 from properties.views import PropertyDetailView, PropertyListView
+
+# Sitemap registar (Story 6.2) — Property + Page klase iz core.sitemaps.
+sitemaps = {"properties": PropertySitemap, "pages": PageSitemap}
 
 
 class UnicodeSlugConverter:
@@ -52,6 +58,26 @@ urlpatterns = [
     path("tinymce/", include("tinymce.urls")),
     # set_language view fallback (van prefiksa).
     path("i18n/", include("django.conf.urls.i18n")),
+    # SEO (Story 6.2) — /sitemap.xml + /robots.txt MORAJU biti VAN i18n_patterns:
+    # crawler-i (Googlebot) očekuju root putanje BEZ /en/ prefiksa. /en/sitemap.xml
+    # i /en/robots.txt → 404 je OČEKIVANO (analogno admin/tinymce odluci iz 6.1).
+    path(
+        "sitemap.xml",
+        sitemap,
+        {"sitemaps": sitemaps},
+        name="django.contrib.sitemaps.views.sitemap",
+    ),
+    # robots.txt — statički template, text/plain. Disallow admin (NFR-5) +
+    # apsolutni Sitemap: link (template gradi {{ request.scheme }}://{{ host }}).
+    path(
+        "robots.txt",
+        TemplateView.as_view(
+            template_name="robots.txt",
+            content_type="text/plain",
+            extra_context={"admin_url": settings.ADMIN_URL},
+        ),
+        name="robots",
+    ),
 ]
 
 # Lokalizabilne rute (Story 6.1) — wrap-ovane u i18n_patterns sa

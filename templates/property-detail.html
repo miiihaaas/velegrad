@@ -18,7 +18,38 @@
      property.title OSTAJE plain {{ property.title }} (nije _sr/_en polje).
 {% endcomment %}
 
-{% block title %}{{ property.title }} — Velegrad Estate{% endblock %}
+{% block title %}{{ property.meta_title|default:property.title }} — Velegrad Estate{% endblock %}
+
+{% comment %}Story 6.2 — per-property SEO meta/OG. meta_description fallback na
+   lokalizovani HTMLField opis prošao striptags|truncatewords (NIKAD sirov u <meta>).{% endcomment %}
+{% block meta_description %}
+  {% if property.meta_description %}
+  <meta name="description" content="{{ property.meta_description }}">
+  {% else %}{% loc property "description" as pdesc %}
+  <meta name="description" content="{{ pdesc|striptags|truncatewords:30 }}">
+  {% endif %}
+{% endblock %}
+
+{% block og %}
+  {% comment %}Apsolutni og:image u OBA grananja (LOCKED): popunjen hero → media URL,
+     prazan hero → static placeholder; oba obmotana u scheme://host (STATIC_URL/MEDIA_URL
+     su relativni). og:url preko get_absolute_url (identična kanonska putanja kao sitemap).{% endcomment %}
+  <meta property="og:title" content="{{ property.meta_title|default:property.title }}">
+  {% if property.meta_description %}
+  <meta property="og:description" content="{{ property.meta_description }}">
+  {% else %}{% loc property "description" as ogdesc %}
+  <meta property="og:description" content="{{ ogdesc|striptags|truncatewords:30 }}">
+  {% endif %}
+  <meta property="og:type" content="product">
+  <meta property="og:image" content="{% if property.hero_image %}{{ request.scheme }}://{{ request.get_host }}{{ property.hero_image.url }}{% else %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/placeholders/hero-placeholder.svg' %}{% endif %}">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ property.get_absolute_url }}">
+{% endblock %}
+
+{% block schema %}{% comment %}RealEstateListing JSON-LD (6.2) — schema_json se
+   gradi u PropertyDetailView (json.dumps sa <,>,& escape-om kao Django json_script),
+   pa je type="application/ld+json" tačan već u server-renderovanom HTML-u.{% endcomment %}
+  <script type="application/ld+json">{{ schema_json|safe }}</script>
+{% endblock %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/pages/property-detail.css' %}">

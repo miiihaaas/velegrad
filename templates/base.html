@@ -9,22 +9,33 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>{% block title %}Velegrad Estate{% endblock %}</title>
+  {% comment %}Story 6.2: globalni SEO default iz SiteSettings.seo_default_* sa
+     brend fallbackom (<head> nikad prazan). Child template-i override per-zapis.{% endcomment %}
+  <title>{% block title %}{{ site_settings.seo_default_title|default:"Velegrad Estate" }}{% endblock %}</title>
 
   {% block meta_description %}
-  <meta name="description" content="Velegrad Estate — boutique platforma za premium nekretnine. Diskrecija, stručnost, rezultati.">
+  <meta name="description" content="{{ site_settings.seo_default_description|default:'Velegrad Estate — boutique platforma za premium nekretnine. Diskrecija, stručnost, rezultati.' }}">
   {% endblock %}
 
   {% block og %}
-  <meta property="og:title" content="Velegrad Estate">
-  <meta property="og:description" content="Diskrecija. Stručnost. Rezultati. Privatno savetovanje za izuzetne nekretnine.">
+  <meta property="og:title" content="{{ site_settings.seo_default_title|default:'Velegrad Estate' }}">
+  <meta property="og:description" content="{{ site_settings.seo_default_description|default:'Diskrecija. Stručnost. Rezultati. Privatno savetovanje za izuzetne nekretnine.' }}">
   <meta property="og:type" content="website">
-  {# Razuman OG default dok Epik 6 ne postavi stvarnu vrednost; override-abilan u {% block og %}. #}
-  <meta property="og:image" content="{% static 'images/placeholders/hero-placeholder.svg' %}">
+  {% comment %}Apsolutni og:image (LOCKED): STATIC_URL je relativan → placeholder se
+     obmotava u scheme://host da og:image nikad ne bude relativan /static/ URL.{% endcomment %}
+  <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/placeholders/hero-placeholder.svg' %}">
   {% endblock %}
 
-  {% block schema %}{% endblock %}{# JSON-LD Schema.org — spremno za Epik 6 #}
-  {% block ga4 %}{% endblock %}{# GA4 placeholder — TODO: dodati kada stigne GA4 measurement ID #}
+  {% block schema %}{% endblock %}{# JSON-LD Schema.org — puni se SAMO na property-detail (6.2) #}
+  {% block ga4 %}{% comment %}GA4 (Story 6.2) — gtag.js renderuje SAMO kad
+     google_analytics_id NIJE prazan ni whitespace-only. ga4_id (obrezano u context
+     processoru) je "" za prazan/whitespace-only -> if falsy -> NULA GA4 skripti.
+     ga4_id_js je JS-string-bezbedna varijanta (navodnik/backslash/HTML meta ->
+     uXXXX) za inline gtag config poziv (auto-escape ne pokriva JS-string).{% endcomment %}
+  {% if ga4_id %}
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga4_id }}"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ ga4_id_js|safe }}');</script>
+  {% endif %}{% endblock %}
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

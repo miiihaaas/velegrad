@@ -7,6 +7,7 @@ import uuid
 
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.urls import reverse
 from django.utils.text import slugify
 
 from tinymce.models import HTMLField
@@ -143,6 +144,17 @@ class Property(LocalizedMixin, models.Model):
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        """Kanonska (no-prefix SR) putanja do detail stranice (Story 6.2).
+
+        Metoda (NE polje) → BEZ migracije. Koristi se konzistentno na TRI mesta:
+        sitemap location(), og:url i Schema url — sve tri emituju IDENTIČNU
+        kanonsku putanju. reverse() razrešava pod aktivnim jezikom; pozivaoci
+        koji žele determinističku SR putanju (sitemap) obmotaju ovaj poziv u
+        translation.override(settings.LANGUAGE_CODE).
+        """
+        return reverse("property-detail", kwargs={"slug": self.slug})
 
     def save(self, *args, **kwargs):
         """Auto-generate a collision-safe slug from ``title`` when blank."""

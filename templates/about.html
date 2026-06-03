@@ -16,7 +16,7 @@
    - Story 6.1: {% loc %} aktivan; /en/ prefiks aktivan (i18n_patterns).
 {% endcomment %}
 
-{% block title %}{% loc page "title" %} — Velegrad Estate{% endblock %}
+{% block title %}{% if page.meta_title %}{{ page.meta_title }}{% else %}{% loc page "title" %}{% endif %} — Velegrad Estate{% endblock %}
 
 {% block meta_description %}
   {% if page.meta_description %}

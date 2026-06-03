@@ -70,6 +70,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # SEO (Story 6.2) — django.contrib.sitemaps generiše /sitemap.xml; zahteva
+    # django.contrib.sites (Site.objects.get_current() za apsolutne URL-ove).
+    # Oba su UGRAĐENA u Django (bez novog paketa); SITE_ID=1 ih pinuje na default
+    # django_site red (Django ugrađena migracija kreira tabelu — NE projektna).
+    "django.contrib.sites",
+    "django.contrib.sitemaps",
     # Custom apps
     "core",
     "properties",
@@ -179,6 +185,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # njem na "sr" (članica LANGUAGES) SR ostaje bez prefiksa i switcher SR link je tačan.
 # localized() koristi get_language()[:2] pa "sr" radi identično; "sr" vs "sr-latn"
 # razlika u formatiranju datuma/brojeva je zanemarljiva za ovaj sajt.
+# django.contrib.sites SITE_ID (Story 6.2) — sitemap framework ga zahteva za
+# apsolutne URL-ove preko Site.objects.get_current(). Default django_site red
+# (example.com) je OK za dev/test; prod (Story 6.4) postavlja Site.domain.
+SITE_ID = 1
+
 LANGUAGE_CODE = "sr"
 TIME_ZONE = "Europe/Belgrade"
 USE_I18N = True

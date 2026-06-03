@@ -17,10 +17,17 @@ Invarijante (LOCKED):
     ?price_min=abc) jednostavno izostaju (preskaču se) dok ostali validni
     filteri i dalje rade. Nevalidan ulaz → 200, nikad 500.
 """
+import json
+
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.templatetags.static import static
 from django.utils.decorators import method_decorator
+from django.utils.html import strip_tags
+from django.utils.safestring import mark_safe
+from django.utils.text import Truncator
 from django.views import View
 from django.views.generic import ListView
 from django_ratelimit.decorators import ratelimit
@@ -145,7 +152,71 @@ class PropertyDetailView(View):
             raise Http404("Property not visible.")
         return obj
 
-    def _build_context(self, obj, form):
+    def _build_schema_json(self, request, obj):
+        """Schema.org RealEstateListing JSON-LD string (Story 6.2 / AC3).
+
+        Dict se gradi OVDE (LOCKED — bez ručnog JSON-a u template-u). image/url su
+        apsolutni preko request.build_absolute_uri (+ get_absolute_url za kanonsku
+        putanju, identičnu sitemap/og:url). description od HTMLField opisa prošao
+        strip_tags + Truncator (json.dumps escape-uje JSON, NE skida HTML tagove).
+        offers SAMO kad price postoji i nije „na upit". Cena je string (Decimal).
+        Serijalizacija escape-uje <, >, & (kao Django json_script) protiv </script>
+        XSS-a, pa se renderuje |safe u <script type="application/ld+json">.
+        """
+        if obj.hero_image:
+            image_url = request.build_absolute_uri(obj.hero_image.url)
+        else:
+            image_url = request.build_absolute_uri(
+                static("images/placeholders/hero-placeholder.svg")
+            )
+
+        description = (obj.meta_description or "").strip()
+        if not description:
+            description = Truncator(strip_tags(obj.localized("description"))).words(
+                30
+            )
+
+        # PostalAddress: grad -> addressLocality, opština -> addressRegion.
+        # Emituj samo neprazne ključeve (bez praznih address polja u JSON-LD).
+        address = {"@type": "PostalAddress"}
+        if obj.location_city:
+            address["addressLocality"] = obj.location_city
+        if obj.location_district:
+            address["addressRegion"] = obj.location_district
+
+        data = {
+            "@context": "https://schema.org",
+            "@type": "RealEstateListing",
+            "name": obj.meta_title or obj.title,
+            "description": description,
+            "image": image_url,
+            "url": request.build_absolute_uri(obj.get_absolute_url()),
+            "address": address,
+        }
+
+        # areaServed samo kad postoji grad (bez praznog/null šuma u JSON-LD-u;
+        # ogledalo uslovnog address handling-a iznad).
+        if obj.location_city:
+            data["areaServed"] = obj.location_city
+
+        if obj.price is not None and not obj.price_on_request:
+            data["offers"] = {
+                "@type": "Offer",
+                "price": str(obj.price),
+                "priceCurrency": "EUR",
+            }
+
+        raw = json.dumps(data, cls=DjangoJSONEncoder, ensure_ascii=False)
+        # Escape HTML meta-znakove (kao django.utils.html.json_script) da JSON
+        # bezbedno živi unutar <script> bloka (sprečava </script> breakout).
+        raw = (
+            raw.replace("<", "\\u003C")
+            .replace(">", "\\u003E")
+            .replace("&", "\\u0026")
+        )
+        return mark_safe(raw)
+
+    def _build_context(self, obj, form, request=None):
         # Defense-in-depth (S2): only expose virtual_tour_url when it is a safe
         # http(s) scheme. Django auto-escape does NOT neutralize a `javascript:`
         # / `data:` scheme inside an href — an admin-entered `javascript:alert(1)`
@@ -156,7 +227,7 @@ class PropertyDetailView(View):
         safe_tour = raw_tour if raw_tour.lower().startswith(
             ("http://", "https://")
         ) else ""
-        return {
+        context = {
             "property": obj,
             "images": obj.images.all(),
             "features": obj.features.all(),
@@ -169,10 +240,14 @@ class PropertyDetailView(View):
                 and obj.show_address
             ),
         }
+        # Schema.org JSON-LD (6.2) — needs request for absolute image/url.
+        if request is not None:
+            context["schema_json"] = self._build_schema_json(request, obj)
+        return context
 
     def get(self, request, slug):
         obj = self._get_object(request, slug)
-        context = self._build_context(obj, InquiryForm())
+        context = self._build_context(obj, InquiryForm(), request=request)
         return render(request, self.template_name, context)
 
     def post(self, request, slug):
@@ -194,5 +269,5 @@ class PropertyDetailView(View):
             return redirect(f"{request.path}?sent=1")
 
         # Invalid -> re-render (200) with bound form errors; NO row created.
-        context = self._build_context(obj, form)
+        context = self._build_context(obj, form, request=request)
         return render(request, self.template_name, context)
