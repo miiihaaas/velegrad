@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n images %}
 
 {% comment %}
   Story 3.1 — Signature listing sa server-side filterima.
@@ -130,11 +130,8 @@
         {% for p in properties %}
           <article class="property-card">
             <div class="property-card__image">
-              {% if p.hero_image %}
-                <img src="{{ p.hero_image.url }}" alt="{{ p.title }}">
-              {% else %}
-                <img src="{% static 'images/placeholders/property-1.svg' %}" alt="">
-              {% endif %}
+              {# Listing kartice (ispod fold-a) → WebP/srcset + lazy. #}
+              {% picture p.hero_image alt=p.title placeholder='images/placeholders/property-1.svg' lazy=True %}
               {% if p.price_on_request or p.status == "price_on_request" %}
                 <span class="badge badge--inquiry property-card__badge">{{ p.get_status_display }}</span>
               {% elif p.status == "for_rent" %}

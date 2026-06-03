@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n i18n_content %}
+{% load static i18n i18n_content images %}
 
 {% comment %}
   Story 4.1 — About stranica iz CMS-a (Page slug="about") + SiteSettings founder.
@@ -43,10 +43,15 @@
   <!-- ════ Portrait ════ -->
   <section class="section fade-in-section" aria-label="{% trans 'Fotografija osnivača' %}" style="padding-block-start: 0;">
     <div class="about-portrait">
+      {# Founder portret (ispod fold-a / non-LCP) → WebP/srcset + lazy; zadržava
+         width/height (CLS). Inline <picture> (tag ne prosleđuje width/height). #}
       {% if site_settings.founder_photo %}
-      <img class="about-portrait__img" src="{{ site_settings.founder_photo.url }}" alt="{{ site_settings.founder_name }}" width="800" height="1000">
+      <picture>
+        <source type="image/webp" srcset="{{ site_settings.founder_photo_webp_480.url }} 480w, {{ site_settings.founder_photo_webp_960.url }} 960w, {{ site_settings.founder_photo_webp_1440.url }} 1440w">
+        <img class="about-portrait__img" src="{{ site_settings.founder_photo.url }}" alt="{{ site_settings.founder_name }}" width="800" height="1000" loading="lazy">
+      </picture>
       {% else %}
-      <img class="about-portrait__img" src="{% static 'images/placeholders/founder-portrait.svg' %}" alt="{{ site_settings.founder_name }}" width="800" height="1000">
+      <img class="about-portrait__img" src="{% static 'images/placeholders/founder-portrait.svg' %}" alt="{{ site_settings.founder_name }}" width="800" height="1000" loading="lazy">
       {% endif %}
     </div>
   </section>

@@ -12,7 +12,7 @@ from django.utils.text import slugify
 
 from tinymce.models import HTMLField
 
-from core.models import IMAGE_EXTENSIONS, LocalizedMixin
+from core.models import IMAGE_EXTENSIONS, LocalizedMixin, webp_spec
 
 
 class PropertyFeature(LocalizedMixin, models.Model):
@@ -105,6 +105,11 @@ class Property(LocalizedMixin, models.Model):
         upload_to="properties/hero/",
         validators=[FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS)],
     )
+    # WebP/srcset varijante za hero_image (Story 6.3 — non-DB descriptors).
+    hero_image_webp_480 = webp_spec("hero_image", 480)
+    hero_image_webp_960 = webp_spec("hero_image", 960)
+    hero_image_webp_1440 = webp_spec("hero_image", 1440)
+
     floor_plan = models.FileField(
         upload_to="properties/floorplans/",
         blank=True,
@@ -185,6 +190,11 @@ class PropertyImage(models.Model):
     caption = models.CharField(max_length=255, blank=True)
     order = models.IntegerField(default=0)
     is_hero = models.BooleanField(default=False)
+
+    # WebP/srcset varijante za gallery image (Story 6.3 — non-DB descriptors).
+    image_webp_480 = webp_spec("image", 480)
+    image_webp_960 = webp_spec("image", 960)
+    image_webp_1440 = webp_spec("image", 1440)
 
     class Meta:
         verbose_name = "Slika nekretnine"

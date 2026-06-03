@@ -6,9 +6,37 @@ from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils.translation import get_language
 
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFit
 from tinymce.models import HTMLField
 
 IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp"]
+
+# --------------------------------------------------------------------------- #
+# WebP / responsive srcset varijante (Story 6.3, NFR-1)                         #
+# --------------------------------------------------------------------------- #
+# Responsive srcset širine — definisane JEDNOM da svi `<source srcset>` u svim
+# template-ima koriste IDENTIČNE `NNNw` deskriptore (usklađeno sa NFR-2
+# breakpointima 375/768/1280 → 480/960/1440 pokriva mobilni/tablet/desktop).
+SRCSET_WIDTHS = (480, 960, 1440)
+
+# Format-literal "WEBP" (JEDAN token kroz celu priču — NE "WebP").
+WEBP_FORMAT = "WEBP"
+
+
+def webp_spec(source, width):
+    """Vrati ImageSpecField za WebP varijantu ``source`` polja na datoj širini.
+
+    ImageSpecField je non-DB descriptor (ImageKit ga NE migrira) → BEZ migracije.
+    Renderuje se SAMO preko spec-ovog `.url` (string-safe pod Optimistic). Visina
+    nije ograničena (ResizeToFit sa height=None) → čuva aspect ratio.
+    """
+    return ImageSpecField(
+        source=source,
+        processors=[ResizeToFit(width=width)],
+        format=WEBP_FORMAT,
+        options={"quality": 82},
+    )
 
 
 class LocalizedMixin(models.Model):
@@ -59,6 +87,11 @@ class SiteSettings(LocalizedMixin, models.Model):
     founder_bio_sr = HTMLField(blank=True)
     founder_bio_en = HTMLField(blank=True)
 
+    # WebP/srcset varijante za founder_photo (Story 6.3 — non-DB descriptors).
+    founder_photo_webp_480 = webp_spec("founder_photo", 480)
+    founder_photo_webp_960 = webp_spec("founder_photo", 960)
+    founder_photo_webp_1440 = webp_spec("founder_photo", 1440)
+
     # Hero / homepage
     hero_headline_sr = models.CharField(max_length=200, blank=True)
     hero_headline_en = models.CharField(max_length=200, blank=True)
@@ -70,6 +103,11 @@ class SiteSettings(LocalizedMixin, models.Model):
         validators=[FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS)],
     )
     hero_video_url = models.URLField(blank=True)
+
+    # WebP/srcset varijante za hero_image (Story 6.3 — non-DB descriptors).
+    hero_image_webp_480 = webp_spec("hero_image", 480)
+    hero_image_webp_960 = webp_spec("hero_image", 960)
+    hero_image_webp_1440 = webp_spec("hero_image", 1440)
 
     # Analitika
     google_analytics_id = models.CharField(max_length=50, blank=True)

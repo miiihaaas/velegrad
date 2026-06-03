@@ -41,3 +41,13 @@ RATELIMIT_ENABLE = False
 # email contract testovi (AC1–AC3) mogu da asertuju poslate poruke. NE oslanjati
 # se na pytest-django implicitni override; izvor mora eksplicitno da ga deklariše.
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+
+# Imagekit cachefile backend — SAMO za testove (Story 6.3 BUG fix). Produkcija
+# (base.py) NE postavlja ovo → koristi imagekit default `Simple` (sinhrono generiše
+# WebP cachefile iz realnih admin-upload bajtova). Test suite, međutim, seed-uje
+# slike kao byteless STRING putanje (npr. hero_image="properties/hero/x.jpg" BEZ
+# bajtova); Optimistic-ov `on_source_saved` → `generate()` bi sa Simple backend-om
+# OTVORIO nepostojeći izvor i digao FileNotFoundError na .save(). No-op
+# DeferredCacheFileBackend (BaseAsync sa no-op schedule_generation) razdvaja save od
+# generisanja i čini markup-only testove (.url string-op) deterministicki bezbednim.
+IMAGEKIT_DEFAULT_CACHEFILE_BACKEND = "core.imagekit_backends.DeferredCacheFileBackend"

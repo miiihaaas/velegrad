@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n i18n_content %}
+{% load static i18n i18n_content images %}
 
 {% comment %}
   Story 2.2 — Home stranica povezana sa bazom.
@@ -26,8 +26,8 @@
   <!-- ════ Section A — Hero ════ -->
   <section class="hero" aria-label="{% trans 'Hero' %}">
     <div class="hero__bg">
-      <img src="{% if site_settings.hero_image %}{{ site_settings.hero_image.url }}{% else %}{% static 'images/placeholders/hero-placeholder.svg' %}{% endif %}"
-           alt="{% trans 'Velegrad Estate' %}">
+      {# Above-fold hero (LCP) — eager (NE lazy); WebP/srcset preko {% picture %}. #}
+      {% picture site_settings.hero_image alt=_('Velegrad Estate') placeholder='images/placeholders/hero-placeholder.svg' sizes='100vw' %}
     </div>
     <div class="hero__overlay"></div>
     <div class="hero__content">
@@ -46,8 +46,8 @@
     <div class="container">
       <div class="advisor">
         <div class="advisor__portrait">
-          <img src="{% if site_settings.founder_photo %}{{ site_settings.founder_photo.url }}{% else %}{% static 'images/placeholders/founder-portrait.svg' %}{% endif %}"
-               alt="{{ site_settings.founder_name }}">
+          {# Below-fold / non-LCP advisor portrait → lazy. #}
+          {% picture site_settings.founder_photo alt=site_settings.founder_name placeholder='images/placeholders/founder-portrait.svg' lazy=True %}
         </div>
         <div class="advisor__content">
           <p class="eyebrow">{% trans "Osnivač i privatni savetnik" %}</p>
@@ -77,11 +77,10 @@
         {% for p in featured_properties %}
           <article class="property-card">
             <div class="property-card__image">
-              {# Bez hero_image rotiramo property-1..4.svg po indeksu (forloop.counter 1–4; queryset je [:4]) da 4 kartice dobiju različite placeholdere. #}
+              {# Bez hero_image rotiramo property-1..4.svg po indeksu (forloop.counter 1–4; queryset je [:4]) da 4 kartice dobiju različite placeholdere. Below-fold → lazy. #}
               {% with idx=forloop.counter|stringformat:"s" %}
               {% with placeholder_name="images/placeholders/property-"|add:idx|add:".svg" %}
-              <img src="{% if p.hero_image %}{{ p.hero_image.url }}{% else %}{% static placeholder_name %}{% endif %}"
-                   alt="{{ p.title }}">
+              {% picture p.hero_image alt=p.title placeholder=placeholder_name lazy=True %}
               {% endwith %}{% endwith %}
               <span class="badge property-card__badge">{{ p.get_status_display }}</span>
             </div>

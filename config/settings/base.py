@@ -76,6 +76,10 @@ INSTALLED_APPS = [
     # django_site red (Django ugrađena migracija kreira tabelu — NE projektna).
     "django.contrib.sites",
     "django.contrib.sitemaps",
+    # django-imagekit (Story 6.3) — keširani WebP + responsive srcset spec-ovi za
+    # media slike (app label "imagekit"; paket django-imagekit već u base.txt od
+    # Story 1.1). ImageSpecField je non-DB descriptor → BEZ migracije.
+    "imagekit",
     # Custom apps
     "core",
     "properties",
@@ -209,8 +213,59 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-MEDIA_URL = "media/"
+# Vodeća kosa crta je OBAVEZNA (Story 6.3): django-imagekit renderuje varijanta
+# `.url`-ove en masse u <picture>/srcset; sa relativnim "media/" srcset URL-ovi ne
+# bi počinjali sa "/" (browser bi ih razrešio relativno na tekuću putanju). "/media/".
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# --------------------------------------------------------------------------- #
+# Storage — storage-agnostic backend izbor (Story 6.3, arhitektura §1.4)        #
+# --------------------------------------------------------------------------- #
+# STORAGES["default"] backend bira `core.storages.default_storage_backend` prema
+# STORAGE_BACKEND env-u (l.23, default "local"): "local" → FileSystemStorage,
+# "s3" → django-storages S3Storage. django-imagekit WebP varijante prolaze kroz
+# isti `default_storage` (IMAGEKIT_DEFAULT_FILE_STORAGE nije postavljen → "default"),
+# pa originali I varijante automatski idu na S3 kad Story 6.4 postavi STORAGE_BACKEND=s3
+# (+ boto3 + AWS_* — ODLOŽENO; 6.3 garantuje samo storage-agnostic PUT).
+# `staticfiles` ostaje Django default FS storage (static NIJE media → ne ide na S3;
+# whitenoise/manifest serviranje je Story 6.4 deploy briga, ne 6.3).
+from core.storages import default_storage_backend  # noqa: E402
+
+STORAGES = {
+    "default": {
+        "BACKEND": default_storage_backend(env("STORAGE_BACKEND")),
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# --------------------------------------------------------------------------- #
+# django-imagekit — WebP + responsive srcset varijante (Story 6.3, NFR-1)       #
+# --------------------------------------------------------------------------- #
+# OBAVEZAN-ZA-ISPRAVNOST (empirijski potvrđeno, django-imagekit 6.1.0): default
+# strategija JustInTime pri `.url` pristupu OTVARA izvorni fajl → FileNotFoundError/
+# HTTP 500 na byteless seed-u/dev-u. Optimistic čini `.url` ČISTOM string operacijom
+# (source.name + spec hash): bez I/O, bez Celery, bez kreiranja fajla; stvarno
+# generisanje se QUEUE-uje SAMO na save-signal izvora. Zato je `.url`-renderovanje u
+# srcset I/O-free i Celery-free. IMAGEKIT_DEFAULT_FILE_STORAGE se NE postavlja →
+# imagekit koristi STORAGES["default"] (storage-agnostic, S3-ready).
+IMAGEKIT_DEFAULT_CACHEFILE_STRATEGY = "imagekit.cachefiles.strategies.Optimistic"
+
+# Cachefile backend: NIJE postavljen u base (produkcija) — imagekit koristi svoj
+# default `Simple` backend, koji SINHRONO generiše varijantu na save-signal izvora
+# (Optimistic-ov `on_source_saved` → `generate()` → Simple piše WebP cachefile u
+# `default_storage`). U produkciji admin upload ima REALNE bajtove, pa Simple
+# uspešno generiše WebP cachefile (arh §1.4) — `.url` ostaje string-safe pod
+# Optimistic. (BUG fix Story 6.3: prethodno je ovde bio
+# `core.imagekit_backends.DeferredCacheFileBackend` (no-op schedule), pa NIJEDAN
+# put nikad nije pisao WebP cachefile → <source srcset> je 404-ovao u produkciji i
+# browser je tiho padao nazad na original JPEG/PNG — NFR-1 WebP optimizacija je bila
+# funkcionalno INERTNA.) No-op DeferredCacheFileBackend ostaje SAMO za testove
+# (config/settings/test.py ga aktivira) gde byteless string-path seed-ovi inače
+# dižu FileNotFoundError na .save(). Stvarna WebP konverzija je sada produkciono
+# sinhrona; NE uvodi Celery.
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

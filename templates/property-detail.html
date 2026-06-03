@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n l10n i18n_content %}
+{% load static i18n l10n i18n_content images %}
 
 {% comment %}
   Story 3.2 — Property Detail stranica + agent-contact mini Inquiry(viewing) forma.
@@ -66,8 +66,8 @@
 
   <!-- ════ Block 1 — Hero Gallery ════ -->
   <section class="detail-hero" aria-label="{% trans 'Galerija fotografija' %}">
-    <img src="{% if property.hero_image %}{{ property.hero_image.url }}{% else %}{% static 'images/placeholders/property-1.svg' %}{% endif %}"
-         alt="{{ property.title }}">
+    {# Above-fold detail-hero (LCP) — eager (NE lazy); WebP/srcset + sizes (AC3). #}
+    {% picture property.hero_image alt=property.title placeholder='images/placeholders/property-1.svg' sizes='100vw' %}
     {# S2: virtual_tour_url je sanitizovan u view-u (samo http/https; javascript:/data: -> "") #}
     {% if virtual_tour_url %}
       <div class="detail-hero__virtual-tour">
@@ -83,8 +83,13 @@
       <div class="thumbnail-strip" role="list" aria-label="{% trans 'Galerija thumbnails' %}">
         {% for img in images %}
           <div class="thumbnail-strip__item{% if forloop.first %} is-active{% endif %}" role="listitem">
-            <img src="{{ img.image.url }}" data-full="{{ img.image.url }}"
-                 alt="{{ img.caption|default:property.title }}">
+            {# Thumbnail prikaz: WebP/srcset + lazy (ispod fold-a). data-full OSTAJE
+               PUN img.image.url (gallery.js lightbox/dedup po URL-u — 3.2 LOCKED). #}
+            <picture>
+              <source type="image/webp" srcset="{{ img.image_webp_480.url }} 480w, {{ img.image_webp_960.url }} 960w, {{ img.image_webp_1440.url }} 1440w">
+              <img src="{{ img.image.url }}" data-full="{{ img.image.url }}"
+                   alt="{{ img.caption|default:property.title }}" loading="lazy">
+            </picture>
           </div>
         {% endfor %}
       </div>
@@ -215,7 +220,8 @@
         <div class="agent-block__header">
           {% if site_settings.founder_photo %}
             <div class="agent-block__avatar">
-              <img src="{{ site_settings.founder_photo.url }}" alt="{{ site_settings.founder_name }}">
+              {# Agent avatar (ispod fold-a / non-LCP) → loading="lazy". #}
+              <img src="{{ site_settings.founder_photo.url }}" alt="{{ site_settings.founder_name }}" loading="lazy">
             </div>
           {% else %}
             <div class="agent-block__avatar" aria-hidden="true">{{ site_settings.founder_name|slice:":2"|upper }}</div>
