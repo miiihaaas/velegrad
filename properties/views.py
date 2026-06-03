@@ -20,8 +20,10 @@ Invarijante (LOCKED):
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import ListView
+from django_ratelimit.decorators import ratelimit
 
 from inquiries.forms import InquiryForm
 from inquiries.services import create_inquiry
@@ -110,6 +112,9 @@ class PropertyListView(ListView):
         return context
 
 
+@method_decorator(
+    ratelimit(key="ip", rate="5/h", method="POST", block=True), name="post"
+)
 class PropertyDetailView(View):
     """Public Property Detail page + agent-contact mini Inquiry(viewing) form.
 

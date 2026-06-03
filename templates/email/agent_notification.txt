@@ -1,0 +1,19 @@
+{% load i18n %}{% trans "Nov upit" %} ({{ inquiry_type_display }})
+====================================================
+
+{% trans "Ime" %}: {{ name }}
+{% trans "Email" %}: {{ email }}
+{% trans "Telefon" %}: {{ phone }}
+{% trans "Tip upita" %}: {{ inquiry_type_display }}
+{% if property %}{% trans "Nekretnina" %}: {{ property }}
+{% endif %}{% if property_type_wanted %}{% trans "Željeni tip nekretnine" %}: {{ property_type_wanted }}
+{% endif %}{% if budget_range %}{% trans "Budžet" %}: {{ budget_range }}
+{% endif %}{% if message %}
+{% trans "Poruka" %}:
+{{ message }}
+{% endif %}
+----------------------------------------------------
+{% trans "Otvori upit u administraciji" %}:
+{{ admin_url }}
+
+— Velegrad Estate

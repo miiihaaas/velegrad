@@ -61,6 +61,9 @@ INSTALLED_APPS = [
     # django-ratelimit 4.x system checks zahtevaju ga u INSTALLED_APPS da
     # `manage.py check` prođe (Story 4.2 NFR-5 — ContactView POST rate-limit).
     "django_ratelimit",
+    # django-anymail (Story 5.2) — prod Mailgun backend. Bezopasno u dev/test
+    # (console/locmem backend ga ignorišu); dokumentovan django-anymail setup.
+    "anymail",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -181,6 +184,18 @@ MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# --------------------------------------------------------------------------- #
+# Email (Story 5.2)                                                            #
+# --------------------------------------------------------------------------- #
+# Pošiljalac za oba toka (agentska notifikacija + auto-reply kupcu). Čita se iz
+# env-a; base NE postavlja EMAIL_BACKEND — svako okruženje bira svoj (dev=console,
+# test=locmem, prod=anymail Mailgun). Override Django placeholdera
+# 'webmaster@localhost' brend pošiljaocem.
+DEFAULT_FROM_EMAIL = env(
+    "DEFAULT_FROM_EMAIL",
+    default="Velegrad Estate <noreply@velegradestate.rs>",
+)
 
 # Forward-compat (Django 6.0): forms.URLField will default to assuming 'https'.
 # Opting in now silences RemovedInDjango60Warning emitted when admin forms render

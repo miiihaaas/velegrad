@@ -37,7 +37,9 @@ Design / locked rules (mirrors the 2.2 / 3.2 / 4.1 harness):
     Property). status="new" + preferred_language="sr" come from create_inquiry.
   * No |safe on any user/contact field (Contact has no admin-curated HTMLField).
     Auto-escape is proven via name="<script>alert(1)</script>" on invalid POST.
-  * No email assertion (4.2 does NOT send — that is 5.2): len(mail.outbox) == 0.
+  * Email: 5.2 SADA šalje preko create_inquiry seam-a — kad je email_inquiries
+    seed-ovan, jedan validan Contact POST pošalje 2 mejla (agent + auto-reply).
+    Ovi testovi su već invertovani da to potvrde (ne više mail.outbox == 0).
   * django-ratelimit is declared in requirements/base.txt but may NOT be
     installed in the active venv yet (Dev installs it in GREEN). The rate-limit
     decorator import is therefore guarded at module import so the OTHER tests
@@ -398,20 +400,23 @@ def test_contact_post_csrf_enforced_403_no_row(client):
 
 
 @pytest.mark.django_db
-def test_contact_post_does_not_send_email(client):
-    # AC2: 4.2 must NOT send email (deferred to 5.2) — the outbox stays empty on a
-    # valid submit (create_inquiry has no send_mail).
-    _seed_site_settings()
+def test_contact_post_sends_two_emails(client):
+    # 5.2 (AC1/AC6 cross-cutting): a valid Contact submit now SENDS 2 emails
+    # (agent notification + buyer auto-reply) via the create_inquiry hook. With
+    # email_inquiries seeded the agent recipient is deterministic, so the outbox
+    # has exactly 2. (Inverted in GREEN from the 4.2 no-email assertion.)
+    _seed_site_settings(email_inquiries="agent@velegradestate.test")
     before = len(mail.outbox)
     resp = client.post(_contact_path(), data=_valid_post_data())
     # The submit must actually succeed (302 PRG) — proving the row was written
-    # via create_inquiry — yet still send NO email (5.2 hook is not wired in 4.2).
+    # via create_inquiry — and now also send the 2 emails (5.2 hook wired).
     assert resp.status_code == 302, (
-        f"a valid Contact POST must PRG-redirect (302) before the no-email "
+        f"a valid Contact POST must PRG-redirect (302) before the email "
         f"assertion is meaningful, got {resp.status_code} (AC2)."
     )
-    assert len(mail.outbox) == before == 0, (
-        "4.2 must NOT send email on a valid Contact submit (email is 5.2) (AC2)."
+    assert len(mail.outbox) == before + 2, (
+        "5.2 must send 2 emails (agent + auto-reply) on a valid Contact submit "
+        "via the create_inquiry hook (AC1/AC6)."
     )
 
 

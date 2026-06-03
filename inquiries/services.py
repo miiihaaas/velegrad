@@ -3,7 +3,9 @@
 ``create_inquiry`` is the single, reusable write-path for an ``Inquiry`` row.
 It is extracted from ``PropertyDetailView.post`` so later stories reuse ONE seam:
 
-  * Story 5.2 hooks the email notification / auto-reply here (NOT here yet).
+  * Story 5.2 email pipeline (notifikacija agentu + auto-reply kupcu) je SADA
+    aktivan ovde: posle ``inquiry.save()`` poziva se ``send_inquiry_notifications``
+    (non-fatal — mail greška ne 500-uje submit).
   * Epic 4/5 contact + private-collection forms reuse this same function.
 
 Security invariants (LOCKED — mirrors story 3.2 AC6):
@@ -13,7 +15,8 @@ Security invariants (LOCKED — mirrors story 3.2 AC6):
     it would IntegrityError/ValueError on ``save()`` — so it is always set.
   * ``ip_address`` is captured from the request when provided (anti-abuse for
     5.2). GDPR: it is PII — retention/anonymization is 5.2 scope.
-  * NO email send here (deferred to 5.2).
+  * Email se SADA šalje (5.2): posle save() poziva se
+    ``send_inquiry_notifications`` (per-flow non-fatal).
 """
 from __future__ import annotations
 
@@ -48,5 +51,10 @@ def create_inquiry(*, form, property, inquiry_type, request=None) -> Inquiry:
         # PII (GDPR) — captured for 5.2 anti-abuse; retention/anonymization 5.2.
         inquiry.ip_address = request.META.get("REMOTE_ADDR")
     inquiry.save()
-    # NO email send here (5.2).
+    # Story 5.2 email pipeline hook — posle inquiry.save(), pre return. Lokalni
+    # import izbegava circular import (emails -> core.models). Non-fatal: greška
+    # u slanju ne sme da 500-uje submit (orkestrator gasi po toku, per-flow).
+    from .emails import send_inquiry_notifications
+
+    send_inquiry_notifications(inquiry, request=request)
     return inquiry

@@ -36,7 +36,9 @@ Design / locked rules (mirrors the 2.2 / 3.1 harness):
     win over any client-supplied (tampering) POST values.
   * No |safe except description_sr (admin-curated HTMLField). Auto-escape proven
     via title='<script>'.
-  * No email assertion (3.2 doesn't send — 5.2). mail.outbox optional == 0.
+  * Email: 5.2 SADA šalje preko create_inquiry seam-a — kad je email_inquiries
+    seed-ovan, jedan validan viewing POST pošalje 2 mejla (agent + auto-reply).
+    Ovi testovi su već invertovani da to potvrde (ne više mail.outbox == 0).
   * Each test maps to an acceptance criterion via an `# AC-N:` comment.
 
 Contract reference:
@@ -818,16 +820,19 @@ def test_inquiry_post_csrf_enforced_403_no_row(client, django_user_model):
 
 
 @pytest.mark.django_db
-def test_inquiry_post_does_not_send_email(client):
-    # AC6 (optional): 3.2 does NOT send email (deferred to 5.2) — the outbox must
-    # not grow on a valid submit.
+def test_inquiry_post_sends_two_emails(client):
+    # 5.2 (AC1/AC6 cross-cutting): a valid viewing submit now SENDS 2 emails
+    # (agent notification + buyer auto-reply) via the create_inquiry hook. With
+    # email_inquiries seeded the agent recipient is deterministic, so the outbox
+    # grows by exactly 2. (Inverted in GREEN from the 3.2 no-email assertion.)
     from django.core import mail
-    _seed_site_settings()
+    _seed_site_settings(email_inquiries="agent@velegradestate.test")
     prop = _make_property()
     before = len(mail.outbox)
     client.post(_detail_path(prop.slug), data=_valid_post_data())
-    assert len(mail.outbox) == before, (
-        "3.2 must NOT send email on a valid Inquiry submit (email is 5.2) (AC6)."
+    assert len(mail.outbox) == before + 2, (
+        "5.2 must send 2 emails (agent + auto-reply) on a valid Inquiry submit "
+        "via the create_inquiry hook (AC1/AC6)."
     )
 
 

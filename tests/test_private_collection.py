@@ -43,7 +43,10 @@ Design / locked rules (mirrors the 4.2 harness — tests/test_contact_page.py):
     status="new" + preferred_language="sr" + message="" come from the seam.
   * No |safe on any user field (Private Collection has no admin-curated
     HTMLField). Auto-escape is proven via name="<script>alert(1)</script>".
-  * No email assertion (5.1 does NOT send — that is 5.2): len(mail.outbox) == 0.
+  * Email: 5.2 SADA šalje preko create_inquiry seam-a — kad je email_inquiries
+    seed-ovan, jedan validan private_collection POST pošalje 2 mejla (agent +
+    auto-reply). Ovi testovi su već invertovani da to potvrde (ne više
+    mail.outbox == 0).
   * The rate-limit decorator / django-ratelimit infra is already installed
     (4.2). RATELIMIT_ENABLE=False in test settings keeps the functional tests
     from tripping; the dedicated rate-limit test re-enables it.
@@ -497,18 +500,23 @@ def test_private_collection_post_csrf_enforced_403_no_row(client):
 
 
 @pytest.mark.django_db
-def test_private_collection_post_does_not_send_email(client):
-    # AC3: 5.1 must NOT send email (deferred to 5.2) — the outbox stays empty on a
-    # valid submit (create_inquiry has no send_mail).
-    _seed_site_settings()
+def test_private_collection_post_sends_two_emails(client):
+    # 5.2 (AC1/AC6 cross-cutting): a valid private_collection submit now SENDS 2
+    # emails (agent notification + buyer auto-reply) via the create_inquiry hook.
+    # This file's _seed_site_settings seeds NO email field, so we MUST pass
+    # email_inquiries here — without it the agent recipient would be blank and
+    # only the auto-reply (1 email) would be sent. (Inverted in GREEN from the
+    # 5.1 no-email assertion.)
+    _seed_site_settings(email_inquiries="agent@velegradestate.test")
     before = len(mail.outbox)
     resp = client.post(_pc_path(), data=_valid_post_data())
     assert resp.status_code == 302, (
-        f"a valid POST must PRG-redirect (302) before the no-email assertion is "
+        f"a valid POST must PRG-redirect (302) before the email assertion is "
         f"meaningful, got {resp.status_code} (AC3)."
     )
-    assert len(mail.outbox) == before == 0, (
-        "5.1 must NOT send email on a valid submit (email is 5.2) (AC3)."
+    assert len(mail.outbox) == before + 2, (
+        "5.2 must send 2 emails (agent + auto-reply) on a valid private_collection "
+        "submit via the create_inquiry hook (AC1/AC6)."
     )
 
 

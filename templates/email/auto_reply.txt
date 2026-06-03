@@ -1,0 +1,12 @@
+{% load i18n %}{% blocktrans %}Poštovani/a {{ name }},{% endblocktrans %}
+
+{% trans "Hvala Vam na upitu upućenom Velegrad Estate." %}
+
+{% trans "Vaša poruka je primljena i naš savetnik će Vam se uskoro javiti. Cenimo Vaše poverenje i radujemo se prilici da Vam pomognemo u pronalaženju izuzetne nekretnine." %}
+
+{% trans "Srdačan pozdrav," %}
+{% trans "Tim Velegrad Estate" %}
+
+—
+Velegrad Estate
+{% trans "Privatno savetovanje za izuzetne nekretnine" %}

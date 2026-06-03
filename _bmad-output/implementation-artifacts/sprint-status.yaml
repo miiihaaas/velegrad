@@ -41,7 +41,7 @@
 # - Klijentski blokirajuci inputi se prikupljaju PARALELNO sa Epikom 1 (IR #4) - eksterna zavisnost, NE kodna prica.
 
 generated: 2026-06-01
-last_updated: 2026-06-03 (5.1 done -> code review complete)
+last_updated: 2026-06-03 (5.2 done -> code review complete; epic-5 all stories done)
 project: VELEGRAD
 project_key: NOKEY
 tracking_system: file-system
@@ -77,7 +77,7 @@ development_status:
   # ---- Epic 5: Private Collection i inquiry sistem (Faza 5) ----
   epic-5: in-progress
   5-1-private-collection-stranica-i-intake-forma: done
-  5-2-inquiry-pipeline-cuvanje-notifikacija-auto-reply-anti-spam: backlog
+  5-2-inquiry-pipeline-cuvanje-notifikacija-auto-reply-anti-spam: done
   epic-5-retrospective: optional
 
   # ---- Epic 6: Multilingual, SEO, performanse i deploy (Faza 6 + 7) ----

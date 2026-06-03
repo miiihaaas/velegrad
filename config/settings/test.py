@@ -36,3 +36,8 @@ DATABASES = {
 # testovi (više POST-ova) nasumično padali na rate-limit (5/h po IP-u). Namenski
 # rate-limit test ga privremeno UKLJUČUJE preko @override_settings(RATELIMIT_ENABLE=True).
 RATELIMIT_ENABLE = False
+
+# Email (Story 5.2) — locmem backend puni django.core.mail.outbox tako da
+# email contract testovi (AC1–AC3) mogu da asertuju poslate poruke. NE oslanjati
+# se na pytest-django implicitni override; izvor mora eksplicitno da ga deklariše.
+EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
