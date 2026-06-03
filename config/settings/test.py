@@ -30,3 +30,9 @@ DATABASES = {
         "NAME": ":memory:",
     }
 }
+
+# Anti-flaky (Story 4.2 AC3): django-ratelimit-ov LocMemCache 'default' alias
+# persistira po-procesu kroz testove → bez ovog flag-a bi AC1/AC2 funkcionalni
+# testovi (više POST-ova) nasumično padali na rate-limit (5/h po IP-u). Namenski
+# rate-limit test ga privremeno UKLJUČUJE preko @override_settings(RATELIMIT_ENABLE=True).
+RATELIMIT_ENABLE = False

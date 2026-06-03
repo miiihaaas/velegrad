@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% comment %}
+  Story 4.2 — Contact stranica sa 4-poljnom Inquiry(general) formom + direktnim
+  kontaktom (tel/wa.me/mailto/address iz SiteSettings).
+  Markup/klase verno docs/OpenDesignFiles/contact.html (63–126).
+
+  Konvencije (LOCKED):
+   - {% extends "base.html" %}; zadržava site-header/site-footer okvir.
+   - Sve UI stringove preko {% trans %} (Contact NEMA Page red — sve je {% trans %}).
+   - NEMA |safe ni na jednom korisničkom/kontakt polju (nema admin-curated HTMLField).
+   - Honeypot {{ form.website }} skriven CSS-om (.sr-only) — NE type="hidden".
+   - site_settings dolazi iz core.context_processors.site_settings (2.2) — global.
+   - loc tag ne postoji (Epik 6); /en/ prefiks ne postoji (Epik 6).
+{% endcomment %}
+
+{% block title %}{% trans "Kontakt" %} — Velegrad Estate{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/pages/contact.css' %}">
+{% endblock %}
+
+{% block content %}
+<main>
+
+  <!-- ════ Hero ════ -->
+  <section class="contact-hero" aria-label="{% trans 'Kontakt hero' %}">
+    <div class="container">
+      <p class="eyebrow mb-sm">{% trans "Velegrad Estate" %}</p>
+      <h1>{% trans "Kontakt" %}</h1>
+      <p class="contact-hero__intro">{% trans "Privatno savetovanje za izuzetne nekretnine." %}</p>
+    </div>
+  </section>
+
+  <!-- ════ Forma + direktni kontakt ════ -->
+  <section class="section" style="padding-block-start: 0;" aria-label="{% trans 'Kontakt forma i informacije' %}">
+    <div class="container">
+      <div class="contact-layout">
+
+        <!-- Levo — Forma -->
+        <div>
+          <h2 class="mb-md">{% trans "Pošaljite poruku" %}</h2>
+
+          {% if request.GET.sent %}
+          <div class="form-success">{% trans "Hvala. Kontaktiraćemo Vas u najkraćem mogućem roku." %}</div>
+          {% endif %}
+
+          <form method="post" class="contact-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="form-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="form-group">
+              <label class="form-label" for="{{ form.name.id_for_label }}">{% trans "Ime i prezime" %}</label>
+              {{ form.name }}
+              {% if form.name.errors %}<div class="form-error">{{ form.name.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="{{ form.phone.id_for_label }}">{% trans "Telefon" %}</label>
+              {{ form.phone }}
+              {% if form.phone.errors %}<div class="form-error">{{ form.phone.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="{{ form.email.id_for_label }}">{% trans "Email" %}</label>
+              {{ form.email }}
+              {% if form.email.errors %}<div class="form-error">{{ form.email.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="{{ form.message.id_for_label }}">{% trans "Poruka" %}</label>
+              {{ form.message }}
+              {% if form.message.errors %}<div class="form-error">{{ form.message.errors }}</div>{% endif %}
+            </div>
+
+            {# Honeypot — skriven CSS-om (.sr-only), NE type="hidden" (botovi preskaču type=hidden). #}
+            <div class="sr-only" aria-hidden="true">
+              <label for="{{ form.website.id_for_label }}">{% trans "Veb sajt (ostavite prazno)" %}</label>
+              {{ form.website }}
+            </div>
+
+            <div>
+              <button type="submit" class="btn btn--primary btn--lg" style="width: 100%;">{% trans "Pošaljite poruku" %}</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Desno — Direktni kontakt (iz SiteSettings, if-gated) -->
+        <div class="contact-direct">
+          {% if site_settings.phone_primary %}
+          <div class="contact-direct__item">
+            <span class="contact-direct__label">{% trans "Telefon" %}</span>
+            <a href="tel:{{ site_settings.phone_primary }}" class="contact-direct__value">{{ site_settings.phone_primary }}</a>
+          </div>
+          {% endif %}
+
+          {% if site_settings.whatsapp_number %}
+          <div class="contact-direct__item">
+            <span class="contact-direct__label">WhatsApp</span>
+            <a href="https://wa.me/{{ site_settings.whatsapp_number }}" class="contact-direct__whatsapp btn btn--champagne" target="_blank" rel="noopener noreferrer">{% trans "Pišite na WhatsApp" %}</a>
+          </div>
+          {% endif %}
+
+          {% if site_settings.email_primary %}
+          <div class="contact-direct__item">
+            <span class="contact-direct__label">Email</span>
+            <a href="mailto:{{ site_settings.email_primary }}" class="contact-direct__value">{{ site_settings.email_primary }}</a>
+          </div>
+          {% endif %}
+
+          {% if site_settings.address %}
+          <div class="contact-direct__address">{{ site_settings.address|linebreaksbr }}</div>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+{% endblock %}

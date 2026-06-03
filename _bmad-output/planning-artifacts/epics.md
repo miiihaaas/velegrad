@@ -557,6 +557,8 @@ So that sajt radi pouzdano i samostalno ga održavam kroz CMS.
 
 **Given** prod sigurnost, **When** je `DEBUG=False`, **Then** `ALLOWED_HOSTS`, secure cookies, CSRF, rate-limit i admin path su aktivni (arhitektura §6, NFR-5), **And** Docker se ne koristi za MVP (arhitektura §7).
 
+**Given** produkcijski rate-limit iza Nginx-a, **When** se deplojuje sa više Gunicorn worker-a, **Then** django-ratelimit mora (a) koristiti **deljeni cache backend** (Redis/Memcached) za `default` cache ili namenski `ratelimit` cache alias — umesto per-process `LocMemCache` iz MVP-a — tako da je brojač upita deljen među svim worker-ima, i (b) čitati **stvarni klijentski IP iza proxy-ja** preko `X-Forwarded-For` (pouzdani-proxy konfiguracija / `django-ipware` ili odgovarajući `RATELIMIT` IP meta key), uz Nginx `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;` — umesto `REMOTE_ADDR` koji iza Nginx-a vraća deljeni proxy IP. Ovo je produkcionizacija rate-limita koji je Story 4.2 namerno pustio na `LocMemCache` + `REMOTE_ADDR` za jedno-procesni MVP (gde su `SILENCED_SYSTEM_CHECKS` `django_ratelimit.E003/W001` svesno utišani); prelazak na deljeni cache obara potrebu za tim utišavanjem (NFR-5, Story 4.2).
+
 **Given** primopredaju, **When** se preda klijentu, **Then** klijent je obučen za samostalan rad u CMS-u (zadatak §7 Faza 7).
 
 **Reference:**

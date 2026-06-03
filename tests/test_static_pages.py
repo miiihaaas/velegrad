@@ -764,14 +764,14 @@ def test_default_admin_path_still_404(client):
 
 
 @pytest.mark.django_db
-def test_contact_route_still_404(client):
-    # AC5: GET /contact/ -> 404 in 4.1 (the route is Story 4.2 — this guard
-    # prevents the dev from prematurely adding /contact/; the CTA is a hardcoded
-    # href string only, asserted WITHOUT an HTTP request elsewhere).
+def test_contact_route_now_200(client):
+    # AC5 (4.2 inversion): GET /contact/ -> 200 — Story 4.2 delivers the Contact
+    # route, so the original 4.1 guard (test_contact_route_still_404) is inverted
+    # here. The About/International CTA href="/contact/" now points at a live route.
     resp = client.get("/contact/")
-    assert resp.status_code == 404, (
-        "GET /contact/ must return 404 in 4.1 (the route is delivered in Story "
-        f"4.2 — do not add it early), got {resp.status_code} (AC5)."
+    assert resp.status_code == 200, (
+        "GET /contact/ must return 200 (Story 4.2 delivers the Contact route), got "
+        f"{resp.status_code} (AC5)."
     )
 
 

@@ -5,9 +5,14 @@ Minimalna home ruta renderuje bazni layout (templates/home.html koji
 custom_404 je eksplicitni handler404 koji renderuje premium 404.html unutar
 baznog okvira (site-header/site-footer) sa HTTP statusom 404.
 """
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.generic import TemplateView
+from django_ratelimit.decorators import ratelimit
 
+from inquiries.forms import InquiryForm
+from inquiries.services import create_inquiry
 from properties.models import Property
 
 from .models import Page
@@ -27,6 +32,57 @@ class HomeView(TemplateView):
             is_featured=True, is_active=True, collection_type="signature"
         )[:4]
         return context
+
+
+@method_decorator(
+    ratelimit(key="ip", rate="5/h", method="POST", block=True), name="post"
+)
+class ContactView(View):
+    """Public Contact page + 4-field Inquiry(general) form (Story 4.2).
+
+    GET renders ``InquiryForm()`` (sa Contact-prilagođenim message placeholder-om)
+    + ``site_settings`` (već globalno preko core.context_processors.site_settings —
+    NE re-load-uje se ovde). POST validira ``InquiryForm(request.POST)`` i verno
+    prati 3.2 ``PropertyDetailView.post`` obrazac (honeypot/CSRF/PRG/create_inquiry),
+    ALI sa ``property=None`` + ``inquiry_type="general"``.
+
+    Security invariants (LOCKED — story 4.2 AC2/AC3):
+      * ``inquiry_type``/``property``/``status``/``preferred_language``/``ip_address``
+        se postavljaju SERVER-SIDE u ``create_inquiry`` — nikad iz POST-a.
+      * popunjen honeypot ``website`` -> NULA redova, ali ISTI 302 ?sent=1 success
+        branch kao realan submit (bot vidi "uspeh", ne uči ništa).
+      * BEZ slanja email-a (odloženo za 5.2).
+      * POST je rate-limitovan na 5/h po IP-u (block=True -> Ratelimited -> 403).
+    """
+
+    template_name = "contact.html"
+
+    def _form(self, data=None):
+        form = InquiryForm(data)
+        # Contact-kontekst: pregazi 3.2 property-specifični placeholder PO INSTANCI
+        # (NE menja InquiryForm klasu/Meta — bez migracija, bez uticaja na 3.2).
+        form.fields["message"].widget.attrs["placeholder"] = "Vaša poruka…"
+        return form
+
+    def get(self, request):
+        return render(request, self.template_name, {"form": self._form()})
+
+    def post(self, request):
+        form = self._form(request.POST)
+        if form.is_valid():
+            # Honeypot: popunjen `website` => tiho odbaci, ali vrati ISTI success
+            # branch (302 -> ?sent=1) kao realan submit. NULA redova, NULA otkrića.
+            if form.cleaned_data.get("website"):
+                return redirect(f"{request.path}?sent=1")
+            # Jedinstveni write-seam (3.2 reuse): server-side polja + ip_address se
+            # postavljaju unutar create_inquiry — nikad iz POST-a. Contact nema
+            # Property pa je property=None, inquiry_type="general".
+            create_inquiry(
+                form=form, property=None, inquiry_type="general", request=request
+            )
+            return redirect(f"{request.path}?sent=1")  # PRG
+        # Invalid -> re-render (200) sa bound greškama; NULA redova.
+        return render(request, self.template_name, {"form": form})
 
 
 def custom_404(request, exception):

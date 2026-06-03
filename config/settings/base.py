@@ -58,6 +58,9 @@ INSTALLED_APPS = [
     "unfold",
     "adminsortable2",
     "tinymce",
+    # django-ratelimit 4.x system checks zahtevaju ga u INSTALLED_APPS da
+    # `manage.py check` prođe (Story 4.2 NFR-5 — ContactView POST rate-limit).
+    "django_ratelimit",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -109,6 +112,29 @@ ASGI_APPLICATION = "config.asgi.application"
 DATABASES = {
     "default": env.db("DATABASE_URL"),
 }
+
+# --------------------------------------------------------------------------- #
+# Cache — `default` alias (Story 4.2 — django-ratelimit backend)               #
+# --------------------------------------------------------------------------- #
+# django-ratelimit drži brojače u `default` cache alias-u. LocMemCache je
+# po-procesu (ne deljen među worker-ima), pa django-ratelimit 4.x diže
+# E003/W001 ("not a shared cache"). Za single-tenant dev/test deployment
+# (jedan proces, mali saobraćaj — MVP odluka) LocMemCache je prihvatljiv i
+# deterministicki za rate-limit, pa eksplicitno utišavamo te dve provere da
+# `manage.py check` prođe. (Prod sa više worker-a bi prešao na Redis/Memcached.)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    }
+}
+
+# MVP (jedno-procesni) odluka. Produkciona granica je TRACKED u Story 6.4 AC:
+# prelazak na deljeni cache (Redis/Memcached) + čitanje stvarnog klijentskog IP-a
+# iza Nginx-a (X-Forwarded-For). Prelazak na deljeni cache obara ovo utišavanje.
+SILENCED_SYSTEM_CHECKS = [
+    "django_ratelimit.E003",
+    "django_ratelimit.W001",
+]
 
 # --------------------------------------------------------------------------- #
 # Password validation                                                          #
