@@ -1,22 +1,6 @@
 {% extends "base.html" %}
 {% load static i18n images %}
 
-{% comment %}
-  Story 3.1 — Signature listing sa server-side filterima.
-  Markup/klase iz docs/OpenDesignFiles/properties.html (filter-bar + listing-grid).
-
-  Konvencije (LOCKED):
-   - Filter-bar je umotan u <form method="get" action="">; filteri se primenjuju
-     SERVERSKI (GET reload) — radi i bez JS-a (progressive enhancement).
-   - name-ovi usklađeni sa PropertyFilterForm: location/property_type/price_min/
-     price_max/bedrooms(hidden, JS upisuje)/status/keyword. NE legacy type/price-min.
-   - Status select koristi MODEL vrednosti (for_sale/for_rent/price_on_request).
-   - filter-bar__optional checkboxovi se IZOSTAVLJAJU (nemaju mapiranje u 3.1).
-   - Kartica CTA → HARDKODOVAN /properties/{{ p.slug }}/ (detalj je 3.2; NE {% url %}).
-   - Card polja BEZ |safe (auto-escape; user/admin uneta polja).
-   - UI copy → {% trans %}. Bez fetch/XHR.
-{% endcomment %}
-
 {% block title %}{% trans "Odabrane nekretnine" %} — Velegrad Estate{% endblock %}
 
 {% block extra_css %}
@@ -26,7 +10,6 @@
 {% block content %}
 <main>
 
-  <!-- ════ Hero ════ -->
   <section class="listing-hero" aria-label="{% trans 'Odabrane nekretnine hero' %}">
     <div class="container">
       <p class="eyebrow mb-sm">{% trans "Kolekcija" %}</p>
@@ -35,20 +18,17 @@
     </div>
   </section>
 
-  <!-- ════ Filter Bar ════ -->
   <section class="section" style="padding-block-start: 0;" aria-label="{% trans 'Filteri' %}">
     <div class="container">
       <form method="get" action="">
         <div class="filter-bar">
           <div class="filter-bar__primary">
-            <!-- Location -->
             <div class="form-group">
               <label class="form-label" for="filter-location">{% trans "Lokacija" %}</label>
               <input type="text" class="form-input" id="filter-location" name="location"
                      value="{{ form.location.value|default:'' }}"
                      placeholder="{% trans 'Npr. Dedinje' %}">
             </div>
-            <!-- Type -->
             <div class="form-group">
               <label class="form-label" for="filter-type">{% trans "Tip nekretnine" %}</label>
               <select class="form-select" id="filter-type" name="property_type">
@@ -60,7 +40,6 @@
                 {% endfor %}
               </select>
             </div>
-            <!-- Status -->
             <div class="form-group">
               <label class="form-label" for="filter-status">{% trans "Status" %}</label>
               <select class="form-select" id="filter-status" name="status">
@@ -72,7 +51,6 @@
                 {% endfor %}
               </select>
             </div>
-            <!-- Price range slider -->
             <div class="form-group form-group--wide">
               <label class="form-label">{% trans "Raspon cena (€)" %}</label>
               <div class="price-slider">
@@ -89,7 +67,6 @@
             </div>
           </div>
 
-          <!-- Bedrooms -->
           <div class="filter-bar__bedrooms">
             <p class="filter-bar__bedrooms-label">{% trans "Spavaće sobe" %}</p>
             <div class="chip-group">
@@ -102,7 +79,6 @@
             <input type="hidden" name="bedrooms" value="{{ form.bedrooms.value|default:'' }}">
           </div>
 
-          <!-- Keyword -->
           <div class="filter-bar__keyword">
             <div class="form-group">
               <label class="form-label" for="filter-keyword">{% trans "Ključna reč" %}</label>
@@ -112,7 +88,6 @@
             </div>
           </div>
 
-          <!-- Actions -->
           <div class="filter-bar__actions">
             <div class="d-flex gap-sm">
               <a href="/properties/" class="btn btn--secondary btn--sm" data-action="reset">{% trans "Resetuj filtere" %}</a>
@@ -122,15 +97,12 @@
         </div>
       </form>
 
-      <!-- Results -->
       <p class="listing-results">{{ properties|length }} {% trans "nekretnina" %}</p>
 
-      <!-- ════ Listing Grid ════ -->
       <div class="listing-grid">
         {% for p in properties %}
           <article class="property-card">
             <div class="property-card__image">
-              {# Listing kartice (ispod fold-a) → WebP/srcset + lazy. #}
               {% picture p.hero_image alt=p.title placeholder='images/placeholders/property-1.svg' lazy=True %}
               {% if p.price_on_request or p.status == "price_on_request" %}
                 <span class="badge badge--inquiry property-card__badge">{{ p.get_status_display }}</span>

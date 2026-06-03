@@ -1,21 +1,6 @@
 {% extends "base.html" %}
 {% load static i18n i18n_content images %}
 
-{% comment %}
-  Story 2.2 — Home stranica povezana sa bazom.
-  Šest sekcija (A–F) iz docs/OpenDesignFiles/index.html (linije 69–296),
-  napunjene sadržajem iz baze: SiteSettings (hero/founder/kontakt) preko
-  context procesora `site_settings`, Property (featured) preko HomeView.
-
-  Konvencije (LOCKED):
-   - Sadržaj iz baze renderuje se DIREKTNO preko _sr polja ({{ ..._sr }}),
-     NIKAD .localized("...") u {{ }} (Django ne prosleđuje string-arg).
-   - UI copy → {% trans %}.
-   - Forward-linkovi ka još-nepostojećim rutama su HARDKODOVANI APSOLUTNI
-     hrefovi (/properties/, /private-collection/, Contact → /), NE {% url %}
-     (NoReverseMatch → 500).
-{% endcomment %}
-
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/pages/home.css' %}">
 {% endblock %}
@@ -23,10 +8,8 @@
 {% block content %}
 <main>
 
-  <!-- ════ Section A — Hero ════ -->
   <section class="hero" aria-label="{% trans 'Hero' %}">
     <div class="hero__bg">
-      {# Above-fold hero (LCP) — eager (NE lazy); WebP/srcset preko {% picture %}. #}
       {% picture site_settings.hero_image alt=_('Velegrad Estate') placeholder='images/placeholders/hero-placeholder.svg' sizes='100vw' %}
     </div>
     <div class="hero__overlay"></div>
@@ -41,12 +24,10 @@
     </div>
   </section>
 
-  <!-- ════ Section B — Personal Brand / Advisor ════ -->
   <section class="section section--ivory" aria-label="{% trans 'O osnivaču' %}">
     <div class="container">
       <div class="advisor">
         <div class="advisor__portrait">
-          {# Below-fold / non-LCP advisor portrait → lazy. #}
           {% picture site_settings.founder_photo alt=site_settings.founder_name placeholder='images/placeholders/founder-portrait.svg' lazy=True %}
         </div>
         <div class="advisor__content">
@@ -54,7 +35,6 @@
           <h2 class="advisor__name">{{ site_settings.founder_name }}</h2>
           <p class="advisor__title">{% loc site_settings "founder_title" %}</p>
           <hr class="separator">
-          {% comment %}founder_bio je admin-curated HTMLField (singleton, samo superuser uređuje) → |safe je bezbedan. loc|safe je sintaksno nemoguće → assign-pa-|safe na promenljivoj.{% endcomment %}
           {% loc site_settings "founder_bio" as founder_bio %}
           <div class="advisor__text">{{ founder_bio|safe }}</div>
           <div class="advisor__contact">
@@ -66,7 +46,6 @@
     </div>
   </section>
 
-  <!-- ════ Section C — Signature Properties (Preview) ════ -->
   <section class="section" aria-label="{% trans 'Odabrane nekretnine' %}">
     <div class="container">
       <div class="properties-preview__header">
@@ -77,7 +56,6 @@
         {% for p in featured_properties %}
           <article class="property-card">
             <div class="property-card__image">
-              {# Bez hero_image rotiramo property-1..4.svg po indeksu (forloop.counter 1–4; queryset je [:4]) da 4 kartice dobiju različite placeholdere. Below-fold → lazy. #}
               {% with idx=forloop.counter|stringformat:"s" %}
               {% with placeholder_name="images/placeholders/property-"|add:idx|add:".svg" %}
               {% picture p.hero_image alt=p.title placeholder=placeholder_name lazy=True %}
@@ -89,7 +67,6 @@
               <div class="property-card__meta">
                 <span>{{ p.get_property_type_display }}</span>
                 <span>{{ p.area_sqm|floatformat:0 }} m²</span>
-                {# SR MVP: jedan ispravan token. Pravilna SR pluralizacija (1 soba / 2–4 sobe / 5+ soba) dolazi sa i18n .po plural-forms u Epic 6. #}
                 <span>{{ p.bedrooms }} {% trans "soba" %}</span>
               </div>
               <div class="property-card__price">
@@ -108,7 +85,6 @@
     </div>
   </section>
 
-  <!-- ════ Section D — Private Collection Teaser ════ -->
   <section class="section section--dark" aria-label="{% trans 'Privatna kolekcija' %}">
     <div class="container">
       <div class="private-teaser">
@@ -120,7 +96,6 @@
     </div>
   </section>
 
-  <!-- ════ Section E — Why Velegrad (Pillars) ════ -->
   <section class="section section--ivory" aria-label="{% trans 'Zašto Velegrad' %}">
     <div class="container">
       <div class="text-center mb-lg">
@@ -191,7 +166,6 @@
     </div>
   </section>
 
-  <!-- ════ Sekcija F — Kontakt teaser ════ -->
   <section class="section" aria-label="{% trans 'Kontakt' %}">
     <div class="container">
       <div class="contact-teaser">

@@ -1,27 +1,8 @@
 {% extends "base.html" %}
 {% load static i18n l10n i18n_content images %}
 
-{% comment %}
-  Story 3.2 — Property Detail stranica + agent-contact mini Inquiry(viewing) forma.
-  Markup/klase iz docs/OpenDesignFiles/property-detail.html (85–307 + lightbox 371–376).
-
-  Konvencije (LOCKED):
-   - {% extends "base.html" %}; sadržaj iz baze kroz _sr polja / display metode.
-   - |safe SAMO na description_sr (admin-curated HTMLField). Sve ostalo auto-escape.
-   - Inquiry forma: pravi nativni POST (method="post" + {% csrf_token %}); BEZ
-     data-validate (forms.js hijack zamka) i BEZ učitavanja js/forms.js.
-   - TAČNO JEDNO submit dugme ("Zakažite privatnu prezentaciju"); "konsultacija"
-     dugme uklonjeno (Epik 4.2).
-   - Honeypot polje `website` skriveno preko .sr-only + aria-hidden/tabindex=-1.
-   - Mapa: SAMO kad show_map (lat+lng+show_address); init guard `typeof L`.
-   - Story 6.1: {% loc %} aktivan (description / feature name / founder_title);
-     property.title OSTAJE plain {{ property.title }} (nije _sr/_en polje).
-{% endcomment %}
-
 {% block title %}{{ property.meta_title|default:property.title }} — Velegrad Estate{% endblock %}
 
-{% comment %}Story 6.2 — per-property SEO meta/OG. meta_description fallback na
-   lokalizovani HTMLField opis prošao striptags|truncatewords (NIKAD sirov u <meta>).{% endcomment %}
 {% block meta_description %}
   {% if property.meta_description %}
   <meta name="description" content="{{ property.meta_description }}">
@@ -31,9 +12,6 @@
 {% endblock %}
 
 {% block og %}
-  {% comment %}Apsolutni og:image u OBA grananja (LOCKED): popunjen hero → media URL,
-     prazan hero → static placeholder; oba obmotana u scheme://host (STATIC_URL/MEDIA_URL
-     su relativni). og:url preko get_absolute_url (identična kanonska putanja kao sitemap).{% endcomment %}
   <meta property="og:title" content="{{ property.meta_title|default:property.title }}">
   {% if property.meta_description %}
   <meta property="og:description" content="{{ property.meta_description }}">
@@ -45,17 +23,12 @@
   <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ property.get_absolute_url }}">
 {% endblock %}
 
-{% block schema %}{% comment %}RealEstateListing JSON-LD (6.2) — schema_json se
-   gradi u PropertyDetailView (json.dumps sa <,>,& escape-om kao Django json_script),
-   pa je type="application/ld+json" tačan već u server-renderovanom HTML-u.{% endcomment %}
+{% block schema %}
   <script type="application/ld+json">{{ schema_json|safe }}</script>
 {% endblock %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/pages/property-detail.css' %}">
-  {% comment %}Leaflet (eksterna mrežna zavisnost — CDN; init je guardovan typeof L).
-     S3: SRI integrity + crossorigin/referrerpolicy hardening (Leaflet 1.9.4).
-     TODO (pre-production, arhitektura §4): vendoring u static/vendor/leaflet/.{% endcomment %}
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin="anonymous" referrerpolicy="no-referrer">
@@ -64,11 +37,8 @@
 {% block content %}
 <main>
 
-  <!-- ════ Block 1 — Hero Gallery ════ -->
   <section class="detail-hero" aria-label="{% trans 'Galerija fotografija' %}">
-    {# Above-fold detail-hero (LCP) — eager (NE lazy); WebP/srcset + sizes (AC3). #}
     {% picture property.hero_image alt=property.title placeholder='images/placeholders/property-1.svg' sizes='100vw' %}
-    {# S2: virtual_tour_url je sanitizovan u view-u (samo http/https; javascript:/data: -> "") #}
     {% if virtual_tour_url %}
       <div class="detail-hero__virtual-tour">
         <a href="{{ virtual_tour_url }}" class="btn btn--light btn--sm"
@@ -77,14 +47,11 @@
     {% endif %}
   </section>
 
-  <!-- Thumbnails -->
   {% if images %}
     <div class="detail-thumbnails">
       <div class="thumbnail-strip" role="list" aria-label="{% trans 'Galerija thumbnails' %}">
         {% for img in images %}
           <div class="thumbnail-strip__item{% if forloop.first %} is-active{% endif %}" role="listitem">
-            {# Thumbnail prikaz: WebP/srcset + lazy (ispod fold-a). data-full OSTAJE
-               PUN img.image.url (gallery.js lightbox/dedup po URL-u — 3.2 LOCKED). #}
             <picture>
               <source type="image/webp" srcset="{{ img.image_webp_480.url }} 480w, {{ img.image_webp_960.url }} 960w, {{ img.image_webp_1440.url }} 1440w">
               <img src="{{ img.image.url }}" data-full="{{ img.image.url }}"
@@ -96,32 +63,23 @@
     </div>
   {% endif %}
 
-  <!-- ════ Block 2 + 3 — Info + Description ════ -->
   <section class="section" aria-label="{% trans 'Detalji nekretnine' %}">
     <div class="container">
       <div class="detail-layout">
 
-        <!-- Main content -->
         <div>
-          <!-- Block 3 — Premium Description -->
           <div class="detail-description fade-in-section">
             <p class="eyebrow mb-md">{{ property.get_property_type_display }} — {{ property.location_district }}, {{ property.location_city }}</p>
             <h2 class="mb-md">{{ property.title }}</h2>
-            {% comment %}|safe opravdan: description je admin-curated HTMLField (TinyMCE). loc|safe je sintaksno nemoguće → assign-pa-|safe na promenljivoj.{% endcomment %}
             {% loc property "description" as description %}{{ description|safe }}
           </div>
 
-          <!-- Block 4 — Features / Amenities -->
           {% if features %}
             <div class="fade-in-section mt-xl">
               <h2 class="mb-md">{% trans "Karakteristike" %}</h2>
               <div class="amenity-grid">
                 {% for f in features %}
                   <div class="amenity-item" data-icon="{{ f.icon }}">
-                    {% comment %}f.icon je CharField (icon slug/CSS klasa) — render-uje se kao klasa
-                       (auto-escape, BEZ |safe) + data-icon da različite karakteristike
-                       budu razlikovne i hookable za icon sistem. Placeholder SVG ostaje
-                       jer dizajn koristi per-amenity inline SVG bez čistog name->path mapiranja.{% endcomment %}
                     <svg class="amenity-item__icon icon-{{ f.icon }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3m0 12v3M3 12h3m12 0h3"/></svg>
                     {% loc f "name" %}
                   </div>
@@ -130,7 +88,6 @@
             </div>
           {% endif %}
 
-          <!-- Block 5 — Floor Plan -->
           {% if property.floor_plan %}
             <div class="detail-floorplan fade-in-section mt-xl">
               <h2 class="mb-md">{% trans "Osnova" %}</h2>
@@ -139,7 +96,6 @@
             </div>
           {% endif %}
 
-          <!-- Block 6 — Map -->
           <div class="fade-in-section mt-xl">
             <h2 class="mb-md">{% trans "Lokacija" %}</h2>
             {% if show_map %}
@@ -156,7 +112,6 @@
 
         </div>
 
-        <!-- Sidebar -->
         <aside class="detail-sidebar">
           {% if property.price_on_request or property.status == "price_on_request" %}
             <span class="badge badge--inquiry mb-sm">{{ property.get_status_display }}</span>
@@ -213,14 +168,12 @@
     </div>
   </section>
 
-  <!-- ════ Block 7 — Agent Contact ════ -->
   <section class="section section--ivory fade-in-section" aria-label="{% trans 'Kontakt agent' %}">
     <div class="container">
       <div class="agent-block" style="max-width: 760px;">
         <div class="agent-block__header">
           {% if site_settings.founder_photo %}
             <div class="agent-block__avatar">
-              {# Agent avatar (ispod fold-a / non-LCP) → loading="lazy". #}
               <img src="{{ site_settings.founder_photo.url }}" alt="{{ site_settings.founder_name }}" loading="lazy">
             </div>
           {% else %}
@@ -248,10 +201,8 @@
           <div class="form-success">{% trans "Hvala. Kontaktiraćemo Vas u najkraćem mogućem roku." %}</div>
         {% endif %}
 
-        {# Pravi nativni POST: BEZ data-validate, forms.js se NE učitava. #}
         <form method="post" action="" class="agent-block__form">
           {% csrf_token %}
-          {# Honeypot — skriveno polje; bot ga popuni -> tihi reject (view). #}
           <div class="sr-only" aria-hidden="true">
             <label for="id_website">{% trans "Sajt (ostavite prazno)" %}</label>
             {{ form.website }}
@@ -288,7 +239,6 @@
 
 </main>
 
-<!-- ════ Lightbox ════ -->
 <div class="lightbox" role="dialog" aria-label="{% trans 'Galerija fotografija' %}" aria-modal="true">
   <button class="lightbox__close" aria-label="{% trans 'Zatvori galeriju' %}">&times;</button>
   <button class="lightbox__nav lightbox__prev" aria-label="{% trans 'Prethodna fotografija' %}">&#8249;</button>
@@ -299,9 +249,7 @@
 {% endblock %}
 
 {% block extra_js %}
-  {# SAMO gallery.js + Leaflet — NIKAD js/forms.js (hijack zamka). #}
   <script src="{% static 'js/gallery.js' %}" defer></script>
-  {# S3: SRI integrity + crossorigin/referrerpolicy hardening (Leaflet 1.9.4). #}
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
           crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>

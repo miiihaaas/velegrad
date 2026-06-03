@@ -1,16 +1,10 @@
 {% load static i18n i18n_content %}<!doctype html>
-{% comment %}Story 6.1: aktivni jezik (sr/en). LANGUAGE_CODE iz i18n context procesora je
-   "sr"/"en"; slice na 2 znaka daje "sr"/"en". SR je no-prefix default
-   (LANGUAGE_CODE="sr" je clanica LANGUAGES), pa translate_url 'sr' daje
-   putanju bez prefiksa, a translate_url 'en' putanju sa /en/ prefiksom.{% endcomment %}
 {% with lang_code=LANGUAGE_CODE|slice:":2" %}
 <html lang="{{ lang_code }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  {% comment %}Story 6.2: globalni SEO default iz SiteSettings.seo_default_* sa
-     brend fallbackom (<head> nikad prazan). Child template-i override per-zapis.{% endcomment %}
   <title>{% block title %}{{ site_settings.seo_default_title|default:"Velegrad Estate" }}{% endblock %}</title>
 
   {% block meta_description %}
@@ -21,17 +15,11 @@
   <meta property="og:title" content="{{ site_settings.seo_default_title|default:'Velegrad Estate' }}">
   <meta property="og:description" content="{{ site_settings.seo_default_description|default:'Diskrecija. Stručnost. Rezultati. Privatno savetovanje za izuzetne nekretnine.' }}">
   <meta property="og:type" content="website">
-  {% comment %}Apsolutni og:image (LOCKED): STATIC_URL je relativan → placeholder se
-     obmotava u scheme://host da og:image nikad ne bude relativan /static/ URL.{% endcomment %}
   <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/placeholders/hero-placeholder.svg' %}">
   {% endblock %}
 
-  {% block schema %}{% endblock %}{# JSON-LD Schema.org — puni se SAMO na property-detail (6.2) #}
-  {% block ga4 %}{% comment %}GA4 (Story 6.2) — gtag.js renderuje SAMO kad
-     google_analytics_id NIJE prazan ni whitespace-only. ga4_id (obrezano u context
-     processoru) je "" za prazan/whitespace-only -> if falsy -> NULA GA4 skripti.
-     ga4_id_js je JS-string-bezbedna varijanta (navodnik/backslash/HTML meta ->
-     uXXXX) za inline gtag config poziv (auto-escape ne pokriva JS-string).{% endcomment %}
+  {% block schema %}{% endblock %}
+  {% block ga4 %}
   {% if ga4_id %}
   <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga4_id }}"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ ga4_id_js|safe }}');</script>
@@ -54,14 +42,12 @@
   <header class="site-header" role="banner">
     <div class="site-header__inner">
       <div class="site-header__logo">
-        {# TODO (IR #4): zameniti placeholder logo klijentskim SVG logom kada stigne. #}
         <a href="/" aria-label="{% trans 'Velegrad Estate' %}">
           <img src="{% static 'images/placeholders/logo.svg' %}" alt="Velegrad Estate" width="160" height="40">
         </a>
       </div>
 
       <nav class="site-nav" aria-label="{% trans 'Glavna navigacija' %}">
-        {# is-active se izvodi iz request.resolver_match.url_name (locale-agnostičan: isto ime sa /en/ prefiksom ili bez), pa svaka stranica koja {% extends 'base.html' %} dobija ispravan aktivni link — ne hardkodovano, radi i pod EN locale-om. Na 404 strani je resolver_match None -> active je prazan -> nijedan link nije aktivan (željeno ponašanje). #}
         {% with active=request.resolver_match.url_name %}
         <a href="/" class="{% if active == 'home' %}is-active{% endif %}">{% trans "Početna" %}</a>
         <a href="{% url 'about' %}" class="{% if active == 'about' %}is-active{% endif %}">{% trans "Privatno savetovanje" %}</a>
@@ -73,7 +59,6 @@
       </nav>
 
       <div class="d-flex gap-sm" style="align-items: center;">
-        {% comment %}Story 6.1: GET <a href> linkovi preko translate_url (čuvaju tekuću putanju, samo dodaju/skidaju /en/ prefiks). BEZ set_language POST forme, BEZ csrf_token — nema CSRF zamke. is-active iz aktivnog jezika.{% endcomment %}
         <div class="lang-switcher hide-mobile">
           <a class="lang-switcher__btn{% if lang_code == 'sr' %} is-active{% endif %}" href="{% translate_url 'sr' %}" aria-label="{% trans 'Srpski' %}">{% trans "SR" %}</a>
           <span class="lang-switcher__sep">|</span>
@@ -88,9 +73,7 @@
     </div>
   </header>
 
-  <!-- Mobile Menu -->
   <div class="mobile-menu" role="dialog" aria-label="{% trans 'Mobilni meni' %}">
-    {# is-active dosledno desktop navigaciji: isti request.resolver_match.url_name mehanizam (locale-agnostičan, radi i pod /en/). #}
     {% with active=request.resolver_match.url_name %}
     <a href="/" class="{% if active == 'home' %}is-active{% endif %}">{% trans "Početna" %}</a>
     <a href="{% url 'about' %}" class="{% if active == 'about' %}is-active{% endif %}">{% trans "Privatno savetovanje" %}</a>
@@ -107,7 +90,6 @@
     <div class="container">
       <div class="site-footer__inner">
         <div class="site-footer__brand">
-          {# TODO (IR #4): zameniti placeholder logo klijentskim SVG logom kada stigne. #}
           <div class="site-footer__logo">
             <img src="{% static 'images/placeholders/logo.svg' %}" alt="{% trans 'Velegrad Estate' %}" width="160" height="40">
           </div>
@@ -137,7 +119,6 @@
       </div>
       <div class="site-footer__bottom">
         <p class="site-footer__copyright">{% trans "Velegrad Estate © 2026" %}</p>
-        {# Story 6.1: footer switcher — isti GET {% translate_url %} pristup kao header. #}
         <div class="lang-switcher">
           <a class="lang-switcher__btn{% if lang_code == 'sr' %} is-active{% endif %}" href="{% translate_url 'sr' %}" aria-label="{% trans 'Srpski' %}">{% trans "SR" %}</a>
           <span class="lang-switcher__sep">|</span>

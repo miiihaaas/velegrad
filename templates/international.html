@@ -1,21 +1,6 @@
 {% extends "base.html" %}
 {% load static i18n i18n_content %}
 
-{% comment %}
-  Story 4.1 — International stranica iz CMS-a (Page slug="international").
-  Markup/klase verno docs/OpenDesignFiles/international.html (64–168).
-
-  Konvencije (LOCKED):
-   - {% extends "base.html" %}; zadržava site-header/site-footer okvir.
-   - |safe ISKLJUČIVO na page content HTMLField (admin-curated TinyMCE, intl-intro)
-     preko obrasca {% loc page "content" as var %}{{ var|safe }}.
-   - page title → {% loc %} (aktivni jezik + _sr fallback), plain auto-escape.
-   - Kuriran 6-korak timeline (01–06) + tematske sekcije = STATIČKI {% trans %}
-     skelet (NE u content — TinyMCE ne bi trebalo da nosi složen markup).
-   - CTA href HARDKODOVAN apsolutni "/contact/" (Contact je 4.2 — NE {% url %}).
-   - Story 6.1: {% loc %} aktivan; /en/ prefiks aktivan (i18n_patterns).
-{% endcomment %}
-
 {% block title %}{% if page.meta_title %}{{ page.meta_title }}{% else %}{% loc page "title" %}{% endif %} — Velegrad Estate{% endblock %}
 
 {% block meta_description %}
@@ -31,7 +16,6 @@
 {% block content %}
 <main>
 
-  <!-- ════ Hero ════ -->
   <section class="intl-hero" aria-label="{% trans 'Međunarodni klijenti hero' %}">
     <div class="container">
       <p class="eyebrow mb-sm">{% trans "Za međunarodne kupce" %}</p>
@@ -40,14 +24,12 @@
     </div>
   </section>
 
-  <!-- ════ Uvod (admin-curated content_sr) ════ -->
   <section class="section fade-in-section" aria-label="{% trans 'Uvod' %}" style="padding-block-start: 0;">
     <div class="container intl-intro">
       {% loc page "content" as content %}{{ content|safe }}
     </div>
   </section>
 
-  <!-- ════ Proces kupovine — timeline (statički skelet 01–06) ════ -->
   <section class="section section--ivory fade-in-section" aria-label="{% trans 'Proces kupovine' %}">
     <div class="container">
       <div class="text-center mb-xl">
@@ -101,7 +83,6 @@
     </div>
   </section>
 
-  <!-- ════ Pravni okvir ════ -->
   <section class="section fade-in-section" aria-label="{% trans 'Pravni okvir' %}">
     <div class="container intl-legal">
       <p class="eyebrow mb-md">{% trans "Osnove" %}</p>
@@ -111,7 +92,6 @@
     </div>
   </section>
 
-  <!-- ════ Bankarstvo i finansiranje ════ -->
   <section class="section section--ivory fade-in-section" aria-label="{% trans 'Bankarstvo' %}">
     <div class="container intl-legal">
       <p class="eyebrow mb-md">{% trans "Finansije" %}</p>
@@ -120,7 +100,6 @@
     </div>
   </section>
 
-  <!-- ════ Servis preseljenja ════ -->
   <section class="section fade-in-section" aria-label="{% trans 'Relokacija' %}">
     <div class="container intl-legal">
       <p class="eyebrow mb-md">{% trans "Opciono" %}</p>
@@ -129,12 +108,10 @@
     </div>
   </section>
 
-  <!-- ════ CTA ════ -->
   <section class="section section--olive fade-in-section" aria-label="{% trans 'Poziv na akciju' %}">
     <div class="container text-center">
       <h2 class="mb-sm" style="color: var(--color-warm-ivory);">{% trans "Zakažite konsultaciju" %}</h2>
       <p style="color: rgba(245,240,232,0.75); max-width: 480px; margin-inline: auto;" class="mb-md">{% trans "Dozvolite nam da Vas provedemo kroz proces sticanja premium nekretnine u Beogradu." %}</p>
-      {# Contact ruta je Story 4.2 — hardkodovan apsolutni href, NE {% url 'contact' %}. #}
       <a href="/contact/" class="btn btn--ghost btn--lg">{% trans "Zakažite konsultaciju" %}</a>
     </div>
   </section>

@@ -1,20 +1,6 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% comment %}
-  Story 4.2 — Contact stranica sa 4-poljnom Inquiry(general) formom + direktnim
-  kontaktom (tel/wa.me/mailto/address iz SiteSettings).
-  Markup/klase verno docs/OpenDesignFiles/contact.html (63–126).
-
-  Konvencije (LOCKED):
-   - {% extends "base.html" %}; zadržava site-header/site-footer okvir.
-   - Sve UI stringove preko {% trans %} (Contact NEMA Page red — sve je {% trans %}).
-   - NEMA |safe ni na jednom korisničkom/kontakt polju (nema admin-curated HTMLField).
-   - Honeypot {{ form.website }} skriven CSS-om (.sr-only) — NE type="hidden".
-   - site_settings dolazi iz core.context_processors.site_settings (2.2) — global.
-   - loc tag ne postoji (Epik 6); /en/ prefiks ne postoji (Epik 6).
-{% endcomment %}
-
 {% block title %}{% trans "Kontakt" %} — Velegrad Estate{% endblock %}
 
 {% block extra_css %}
@@ -24,7 +10,6 @@
 {% block content %}
 <main>
 
-  <!-- ════ Hero ════ -->
   <section class="contact-hero" aria-label="{% trans 'Kontakt hero' %}">
     <div class="container">
       <p class="eyebrow mb-sm">{% trans "Velegrad Estate" %}</p>
@@ -33,12 +18,10 @@
     </div>
   </section>
 
-  <!-- ════ Forma + direktni kontakt ════ -->
   <section class="section" style="padding-block-start: 0;" aria-label="{% trans 'Kontakt forma i informacije' %}">
     <div class="container">
       <div class="contact-layout">
 
-        <!-- Levo — Forma -->
         <div>
           <h2 class="mb-md">{% trans "Pošaljite poruku" %}</h2>
 
@@ -77,7 +60,6 @@
               {% if form.message.errors %}<div class="form-error">{{ form.message.errors }}</div>{% endif %}
             </div>
 
-            {# Honeypot — skriven CSS-om (.sr-only), NE type="hidden" (botovi preskaču type=hidden). #}
             <div class="sr-only" aria-hidden="true">
               <label for="{{ form.website.id_for_label }}">{% trans "Veb sajt (ostavite prazno)" %}</label>
               {{ form.website }}
@@ -89,7 +71,6 @@
           </form>
         </div>
 
-        <!-- Desno — Direktni kontakt (iz SiteSettings, if-gated) -->
         <div class="contact-direct">
           {% if site_settings.phone_primary %}
           <div class="contact-direct__item">

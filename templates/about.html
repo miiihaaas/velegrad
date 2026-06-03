@@ -1,21 +1,6 @@
 {% extends "base.html" %}
 {% load static i18n i18n_content images %}
 
-{% comment %}
-  Story 4.1 — About stranica iz CMS-a (Page slug="about") + SiteSettings founder.
-  Markup/klase verno docs/OpenDesignFiles/about.html (64–196).
-
-  Konvencije (LOCKED):
-   - {% extends "base.html" %}; zadržava site-header/site-footer okvir.
-   - |safe ISKLJUČIVO na page content HTMLField (admin-curated TinyMCE) preko
-     obrasca {% loc page "content" as var %}{{ var|safe }}.
-   - page title / founder_title → {% loc %} (aktivni jezik + _sr fallback), plain.
-   - site_settings dolazi iz core.context_processors.site_settings (2.2) — global.
-   - Statički UI skelet (services-list, why-pillar, eyebrow/h2) = {% trans %}.
-   - CTA href HARDKODOVAN apsolutni "/contact/" (Contact je 4.2 — NE {% url %}).
-   - Story 6.1: {% loc %} aktivan; /en/ prefiks aktivan (i18n_patterns).
-{% endcomment %}
-
 {% block title %}{% if page.meta_title %}{{ page.meta_title }}{% else %}{% loc page "title" %}{% endif %} — Velegrad Estate{% endblock %}
 
 {% block meta_description %}
@@ -31,7 +16,6 @@
 {% block content %}
 <main>
 
-  <!-- ════ Hero ════ -->
   <section class="about-hero" aria-label="{% trans 'Privatno savetovanje hero' %}">
     <div class="container">
       <p class="eyebrow mb-sm">{% trans "Velegrad Estate" %}</p>
@@ -40,11 +24,8 @@
     </div>
   </section>
 
-  <!-- ════ Portrait ════ -->
   <section class="section fade-in-section" aria-label="{% trans 'Fotografija osnivača' %}" style="padding-block-start: 0;">
     <div class="about-portrait">
-      {# Founder portret (ispod fold-a / non-LCP) → WebP/srcset + lazy; zadržava
-         width/height (CLS). Inline <picture> (tag ne prosleđuje width/height). #}
       {% if site_settings.founder_photo %}
       <picture>
         <source type="image/webp" srcset="{{ site_settings.founder_photo_webp_480.url }} 480w, {{ site_settings.founder_photo_webp_960.url }} 960w, {{ site_settings.founder_photo_webp_1440.url }} 1440w">
@@ -56,7 +37,6 @@
     </div>
   </section>
 
-  <!-- ════ Bio + filozofija (admin-curated content_sr) ════ -->
   <section class="section fade-in-section" aria-label="{% trans 'Biografija' %}">
     <div class="container about-bio">
       <p class="eyebrow mb-md">{% trans "O osnivaču" %}</p>
@@ -65,7 +45,6 @@
     </div>
   </section>
 
-  <!-- ════ Servisi ════ -->
   <section class="section fade-in-section" aria-label="{% trans 'Servisi' %}">
     <div class="container">
       <div class="text-center mb-lg">
@@ -82,7 +61,6 @@
     </div>
   </section>
 
-  <!-- ════ Zašto Velegrad (why-pillar) ════ -->
   <section class="section section--ivory fade-in-section" aria-label="{% trans 'Zašto Velegrad' %}">
     <div class="container">
       <div class="text-center mb-lg">
@@ -157,12 +135,10 @@
     </div>
   </section>
 
-  <!-- ════ CTA ════ -->
   <section class="section fade-in-section" aria-label="{% trans 'Poziv na akciju' %}">
     <div class="container text-center">
       <h2 class="mb-sm">{% trans "Zakažite privatnu konsultaciju" %}</h2>
       <p class="text-muted mb-md" style="max-width: 480px; margin-inline: auto;">{% trans "Svaki razgovor započinje razumevanjem Vaših potreba i očekivanja." %}</p>
-      {# Contact ruta je Story 4.2 — hardkodovan apsolutni href, NE {% url 'contact' %}. #}
       <a href="/contact/" class="btn btn--primary btn--lg">{% trans "Zakažite konsultaciju" %}</a>
     </div>
   </section>
