@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n i18n_content %}
 
 {% comment %}
   Story 4.1 — About stranica iz CMS-a (Page slug="about") + SiteSettings founder.
@@ -7,16 +7,16 @@
 
   Konvencije (LOCKED):
    - {% extends "base.html" %}; zadržava site-header/site-footer okvir.
-   - |safe ISKLJUČIVO na page.content_sr (admin-curated TinyMCE HTMLField).
-   - page.title_sr / site_settings.founder_name / founder_title_sr → plain {{ }}
-     auto-escape (NE |safe, NE .localized() u {{ }}).
+   - |safe ISKLJUČIVO na page content HTMLField (admin-curated TinyMCE) preko
+     obrasca {% loc page "content" as var %}{{ var|safe }}.
+   - page title / founder_title → {% loc %} (aktivni jezik + _sr fallback), plain.
    - site_settings dolazi iz core.context_processors.site_settings (2.2) — global.
    - Statički UI skelet (services-list, why-pillar, eyebrow/h2) = {% trans %}.
    - CTA href HARDKODOVAN apsolutni "/contact/" (Contact je 4.2 — NE {% url %}).
-   - {% loc %} ne postoji (Epik 6); /en/ prefiks ne postoji (Epik 6).
+   - Story 6.1: {% loc %} aktivan; /en/ prefiks aktivan (i18n_patterns).
 {% endcomment %}
 
-{% block title %}{{ page.title_sr }} — Velegrad Estate{% endblock %}
+{% block title %}{% loc page "title" %} — Velegrad Estate{% endblock %}
 
 {% block meta_description %}
   {% if page.meta_description %}
@@ -35,7 +35,7 @@
   <section class="about-hero" aria-label="{% trans 'Privatno savetovanje hero' %}">
     <div class="container">
       <p class="eyebrow mb-sm">{% trans "Velegrad Estate" %}</p>
-      <h1>{{ page.title_sr }}</h1>
+      <h1>{% loc page "title" %}</h1>
       <p class="about-hero__tagline">{% trans "Privatno savetovanje za one koji očekuju izuzetnost u svakom koraku." %}</p>
     </div>
   </section>
@@ -55,8 +55,8 @@
   <section class="section fade-in-section" aria-label="{% trans 'Biografija' %}">
     <div class="container about-bio">
       <p class="eyebrow mb-md">{% trans "O osnivaču" %}</p>
-      {{ page.content_sr|safe }}
-      <p class="text-muted">{{ site_settings.founder_name }} — {{ site_settings.founder_title_sr }}</p>
+      {% loc page "content" as content %}{{ content|safe }}
+      <p class="text-muted">{{ site_settings.founder_name }} — {% loc site_settings "founder_title" %}</p>
     </div>
   </section>
 

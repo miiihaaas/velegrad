@@ -1,0 +1,789 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-03 08:39+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Izaberite…"
+msgstr "Select…"
+
+msgid "Stan"
+msgstr "Apartment"
+
+msgid "Kuća"
+msgstr "House"
+
+msgid "Penthouse"
+msgstr "Penthouse"
+
+msgid "Vila"
+msgstr "Villa"
+
+msgid "Komercijalno"
+msgstr "Commercial"
+
+msgid "Zemljište"
+msgstr "Land"
+
+msgid "Izaberite raspon…"
+msgstr "Select a range…"
+
+msgid "Do €500.000"
+msgstr "Up to €500,000"
+
+msgid "€500.000 – €1.000.000"
+msgstr "€500,000 – €1,000,000"
+
+msgid "€1.000.000 – €2.000.000"
+msgstr "€1,000,000 – €2,000,000"
+
+msgid "€2.000.000 – €5.000.000"
+msgstr "€2,000,000 – €5,000,000"
+
+msgid "€5.000.000+"
+msgstr "€5,000,000+"
+
+msgid "404 — Stranica nije pronađena"
+msgstr "404 — Page not found"
+
+msgid "Tražena stranica ne postoji ili je premeštena."
+msgstr "The page you requested does not exist or has been moved."
+
+msgid "Stranica nije pronađena"
+msgstr "Page not found"
+
+msgid "Vratite se na početnu"
+msgstr "Back to home"
+
+msgid "Kontaktirajte nas"
+msgstr "Contact us"
+
+msgid "Privatno savetovanje hero"
+msgstr "Private advisory hero"
+
+msgid "Velegrad Estate"
+msgstr "Velegrad Estate"
+
+msgid "Privatno savetovanje za one koji očekuju izuzetnost u svakom koraku."
+msgstr "Private advisory for those who expect excellence at every step."
+
+msgid "Fotografija osnivača"
+msgstr "Founder photograph"
+
+msgid "Biografija"
+msgstr "Biography"
+
+msgid "O osnivaču"
+msgstr "About the founder"
+
+msgid "Servisi"
+msgstr "Services"
+
+msgid "Usluge"
+msgstr "Services"
+
+msgid "Servisi koje nudimo"
+msgstr "Services we offer"
+
+msgid "Privatno savetovanje pri kupovini"
+msgstr "Private advisory on purchases"
+
+msgid "Pristup off-market portfoliju"
+msgstr "Access to the off-market portfolio"
+
+msgid "Pregovaranje u ime klijenta"
+msgstr "Negotiation on the client's behalf"
+
+msgid "Konsultacije za međunarodne kupce"
+msgstr "Consulting for international buyers"
+
+msgid "Selekcija premium nekretnina"
+msgstr "Selection of premium properties"
+
+msgid "Zašto Velegrad"
+msgstr "Why Velegrad"
+
+msgid "Naša razlika"
+msgstr "Our difference"
+
+msgid "Diskrecija"
+msgstr "Discretion"
+
+msgid ""
+"Svaka transakcija i svaki razgovor ostaju strogo poverljivi. Naši klijenti "
+"su ljudi koji cene privatnost iznad svega — i to je tačno ono što "
+"garantujemo. Informacije o nekretninama, pregovorima i uslovima nikada ne "
+"napuštaju okvir naše saradnje."
+msgstr ""
+"Every transaction and every conversation stays strictly confidential. Our "
+"clients are people who value privacy above all — and that is exactly what we"
+" guarantee. Information about properties, negotiations and terms never "
+"leaves the scope of our cooperation."
+
+msgid "Pregovaranje"
+msgstr "Negotiation"
+
+msgid ""
+"Zastupamo isključivo Vaše interese — bez kompromisa. Naš pristup "
+"pregovaranju je metodičan i strategijski. Analiziramo tržišnu vrednost, "
+"identifikujemo pozicije prednosti i koristimo ih u Vašu korist."
+msgstr ""
+"We represent your interests exclusively — without compromise. Our approach "
+"to negotiation is methodical and strategic. We analyse market value, "
+"identify positions of advantage and use them in your favour."
+
+msgid "Premium mreža"
+msgstr "Premium network"
+
+msgid ""
+"Pristup nekretninama koje nikada neće biti javno oglašene. Naša mreža "
+"uključuje vlasništva koja se prodaju isključivo putem privatnih kanala — od "
+"rezidencijalnih objekata na prestižnim lokacijama do investicionih prilika "
+"koje zahtevaju diskreciju."
+msgstr ""
+"Access to properties that will never be publicly listed. Our network "
+"includes holdings sold exclusively through private channels — from "
+"residential properties in prestigious locations to investment opportunities "
+"that require discretion."
+
+msgid "Međunarodni klijenti"
+msgstr "International clients"
+
+msgid ""
+"Iskustvo sa kupcima i investitorima iz Francuske, Nemačke i UK. Razumemo "
+"specifične potrebe međunarodnih klijenata — od pravnog okvira za strane "
+"državljane, preko poreskih implikacija, do kompletne logistike kupovine na "
+"daljinu."
+msgstr ""
+"Experience with buyers and investors from France, Germany and the UK. We "
+"understand the specific needs of international clients — from the legal "
+"framework for foreign nationals, through tax implications, to the complete "
+"logistics of a remote purchase."
+
+msgid "Lični pristup"
+msgstr "Personal approach"
+
+msgid ""
+"Radimo sa ograničenim brojem klijenata. Ovo nije ograničenje — to je "
+"filozofija. Svaki klijent dobija punu pažnju i posvećenost jednog savetnika "
+"koji poznaje vaše prioritete, vremenski okvir i kriterijume."
+msgstr ""
+"We work with a limited number of clients. This is not a limitation — it is a"
+" philosophy. Every client receives the full attention and dedication of a "
+"single advisor who knows your priorities, timeframe and criteria."
+
+msgid "Pouzdanost"
+msgstr "Reliability"
+
+msgid ""
+"Dugogodišnje prisustvo na premium segmentu beogradskog tržišta. Naša "
+"reputacija je izgrađena na rezultatima — svaka uspešna transakcija je "
+"potvrda da kvalitet, integritet i stručnost nemaju alternativu."
+msgstr ""
+"A long-standing presence in the premium segment of the Belgrade market. Our "
+"reputation is built on results — every successful transaction confirms that "
+"quality, integrity and expertise have no alternative."
+
+msgid "Poziv na akciju"
+msgstr "Call to action"
+
+msgid "Zakažite privatnu konsultaciju"
+msgstr "Book a private consultation"
+
+msgid "Svaki razgovor započinje razumevanjem Vaših potreba i očekivanja."
+msgstr ""
+"Every conversation begins with understanding your needs and expectations."
+
+msgid "Zakažite konsultaciju"
+msgstr "Book a consultation"
+
+msgid "Velegrad CMS"
+msgstr "Velegrad CMS"
+
+msgid "Aktivne nekretnine"
+msgstr "Active properties"
+
+msgid "Novi upiti"
+msgstr "New inquiries"
+
+msgid "Izdvojene nekretnine"
+msgstr "Featured properties"
+
+msgid "Dodaj nekretninu"
+msgstr "Add property"
+
+msgid "Upiti"
+msgstr "Inquiries"
+
+msgid "Poslednji upiti"
+msgstr "Latest inquiries"
+
+msgid "Ime"
+msgstr "Name"
+
+msgid "Tip"
+msgstr "Type"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Datum"
+msgstr "Date"
+
+msgid "Još nema upita."
+msgstr "No inquiries yet."
+
+msgid "Glavna navigacija"
+msgstr "Main navigation"
+
+msgid "Početna"
+msgstr "Home"
+
+msgid "Privatno savetovanje"
+msgstr "Private advisory"
+
+msgid "Odabrane nekretnine"
+msgstr "Featured properties"
+
+msgid "Privatna kolekcija"
+msgstr "Private collection"
+
+msgid "Kontakt"
+msgstr "Contact"
+
+msgid "Srpski"
+msgstr "Serbian"
+
+msgid "SR"
+msgstr "SR"
+
+msgid "Engleski"
+msgstr "English"
+
+msgid "EN"
+msgstr "EN"
+
+msgid "Otvori meni"
+msgstr "Open menu"
+
+msgid "Mobilni meni"
+msgstr "Mobile menu"
+
+msgid "Stranice"
+msgstr "Pages"
+
+msgid "Više"
+msgstr "More"
+
+msgid "Velegrad Estate © 2026"
+msgstr "Velegrad Estate © 2026"
+
+msgid "Kontakt hero"
+msgstr "Contact hero"
+
+msgid "Privatno savetovanje za izuzetne nekretnine."
+msgstr "Private advisory for exceptional properties."
+
+msgid "Kontakt forma i informacije"
+msgstr "Contact form and information"
+
+msgid "Pošaljite poruku"
+msgstr "Send a message"
+
+msgid "Hvala. Kontaktiraćemo Vas u najkraćem mogućem roku."
+msgstr "Thank you. We will contact you as soon as possible."
+
+msgid "Ime i prezime"
+msgstr "Full name"
+
+msgid "Telefon"
+msgstr "Phone"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Poruka"
+msgstr "Message"
+
+msgid "Veb sajt (ostavite prazno)"
+msgstr "Website (leave blank)"
+
+msgid "Pišite na WhatsApp"
+msgstr "Message on WhatsApp"
+
+msgid "Nov upit"
+msgstr "New inquiry"
+
+msgid "Tip upita"
+msgstr "Inquiry type"
+
+msgid "Nekretnina"
+msgstr "Property"
+
+msgid "Željeni tip"
+msgstr "Preferred type"
+
+msgid "Budžet"
+msgstr "Budget"
+
+msgid "Otvori upit u administraciji"
+msgstr "Open inquiry in the admin"
+
+msgid "Privatno savetovanje za izuzetne nekretnine"
+msgstr "Private advisory for exceptional properties"
+
+msgid "Željeni tip nekretnine"
+msgstr "Preferred property type"
+
+msgid "Hvala na Vašem upitu"
+msgstr "Thank you for your inquiry"
+
+#, python-format
+msgid "Poštovani/a %(name)s,"
+msgstr "Dear %(name)s,"
+
+msgid ""
+"Hvala Vam na upitu upućenom Velegrad Estate. Vaša poruka je primljena i naš "
+"savetnik će Vam se uskoro javiti."
+msgstr ""
+"Thank you for your inquiry to Velegrad Estate. Your message has been "
+"received and our advisor will be in touch with you shortly."
+
+msgid ""
+"Cenimo Vaše poverenje i radujemo se prilici da Vam pomognemo u pronalaženju "
+"izuzetne nekretnine."
+msgstr ""
+"We appreciate your trust and look forward to the opportunity to help you "
+"find an exceptional property."
+
+msgid "Srdačan pozdrav,"
+msgstr "Kind regards,"
+
+msgid "Tim Velegrad Estate"
+msgstr "The Velegrad Estate team"
+
+msgid "Hvala Vam na upitu upućenom Velegrad Estate."
+msgstr "Thank you for your inquiry to Velegrad Estate."
+
+msgid ""
+"Vaša poruka je primljena i naš savetnik će Vam se uskoro javiti. Cenimo Vaše"
+" poverenje i radujemo se prilici da Vam pomognemo u pronalaženju izuzetne "
+"nekretnine."
+msgstr ""
+"Your message has been received and our advisor will be in touch with you "
+"shortly. We appreciate your trust and look forward to the opportunity to "
+"help you find an exceptional property."
+
+msgid "Hero"
+msgstr "Hero"
+
+msgid "Privatni savetnik za premium nekretnine"
+msgstr "Private advisor for premium properties"
+
+msgid "Osnivač i privatni savetnik"
+msgstr "Founder and private advisor"
+
+msgid "Pozovi direktno"
+msgstr "Call directly"
+
+msgid "WhatsApp"
+msgstr "WhatsApp"
+
+msgid "Pogledajte sve"
+msgstr "View all"
+
+msgid "soba"
+msgstr "rooms"
+
+msgid "Cena na upit"
+msgstr "Price on request"
+
+msgid "Detaljnije"
+msgstr "Details"
+
+msgid "Odabrane nekretnine uskoro."
+msgstr "Featured properties coming soon."
+
+msgid "Pogledajte sve odabrane nekretnine"
+msgstr "View all featured properties"
+
+msgid "Ekskluzivno"
+msgstr "Exclusive"
+
+msgid ""
+"Odabrane nekretnine nisu javno oglašene i dostupne su isključivo "
+"kvalifikovanim klijentima. Kontaktirajte nas za pristup portfoliju privatne "
+"kolekcije."
+msgstr ""
+"Selected properties are not publicly listed and are available exclusively to"
+" qualified clients. Contact us for access to the private collection "
+"portfolio."
+
+msgid "Pristupite privatnoj kolekciji"
+msgstr "Access the private collection"
+
+msgid "Svaka transakcija i svaki razgovor ostaju strogo poverljivi."
+msgstr "Every transaction and every conversation stays strictly confidential."
+
+msgid "Zastupamo isključivo Vaše interese — bez kompromisa."
+msgstr "We represent your interests exclusively — without compromise."
+
+msgid "Pristup nekretninama koje nikada neće biti javno oglašene."
+msgstr "Access to properties that will never be publicly listed."
+
+msgid "Iskustvo sa kupcima i investitorima iz Francuske, Nemačke i UK."
+msgstr "Experience with buyers and investors from France, Germany and the UK."
+
+msgid "Radimo sa ograničenim brojem klijenata."
+msgstr "We work with a limited number of clients."
+
+msgid "Dugogodišnje prisustvo na premium segmentu beogradskog tržišta."
+msgstr ""
+"A long-standing presence in the premium segment of the Belgrade market."
+
+msgid "Zakažite razgovor"
+msgstr "Book a conversation"
+
+msgid ""
+"Svaki razgovor počinje razumevanjem Vaših potreba. Javite nam se direktno."
+msgstr ""
+"Every conversation begins with understanding your needs. Get in touch with "
+"us directly."
+
+msgid "Pozovite direktno"
+msgstr "Call directly"
+
+msgid "Međunarodni klijenti hero"
+msgstr "International clients hero"
+
+msgid "Za međunarodne kupce"
+msgstr "For international buyers"
+
+msgid "Vaš vodič za kupovinu premium nekretnina u Beogradu, Srbija."
+msgstr "Your guide to buying premium property in Belgrade, Serbia."
+
+msgid "Uvod"
+msgstr "Introduction"
+
+msgid "Proces kupovine"
+msgstr "The buying process"
+
+msgid "Korak po korak"
+msgstr "Step by step"
+
+msgid "Proces kupovine za strane državljane"
+msgstr "The buying process for foreign nationals"
+
+msgid "Inicijalna konsultacija"
+msgstr "Initial consultation"
+
+msgid ""
+"Razumevanje Vaših potreba, budžeta i vremenskog okvira. Definisanje "
+"kriterijuma pretrage i predstavljanje mogućnosti na beogradskom tržištu."
+msgstr ""
+"Understanding your needs, budget and timeframe. Defining search criteria and"
+" presenting opportunities on the Belgrade market."
+
+msgid "Identifikacija nekretnine"
+msgstr "Property identification"
+
+msgid ""
+"Pažljiva selekcija nekretnina koje odgovaraju Vašim kriterijumima. "
+"Organizovanje privatnih obilazaka — lično ili putem video prezentacije."
+msgstr ""
+"A careful selection of properties matching your criteria. Arranging private "
+"viewings — in person or via video presentation."
+
+msgid "Due diligence i pravna provera"
+msgstr "Due diligence and legal review"
+
+msgid ""
+"Kompletna provera pravnog statusa nekretnine, vlasničke dokumentacije, "
+"urbanističkih dozvola i eventualnih tereta. Saradnja sa proverenim pravnim "
+"timom."
+msgstr ""
+"A complete review of the property's legal status, ownership documentation, "
+"planning permits and any encumbrances. In cooperation with a trusted legal "
+"team."
+
+msgid "Pregovaranje uslova"
+msgstr "Negotiating terms"
+
+msgid ""
+"Zastupamo Vaše interese u pregovorima o ceni, uslovima plaćanja i rokovima. "
+"Cilj je uvek optimalan dogovor za našeg klijenta."
+msgstr ""
+"We represent your interests in negotiations over price, payment terms and "
+"deadlines. The goal is always the optimal deal for our client."
+
+msgid "Notarska overa i registracija"
+msgstr "Notarisation and registration"
+
+msgid ""
+"Priprema i potpisivanje ugovora kod javnog beležnika. Registracija "
+"vlasništva u katastru nepokretnosti. Kompletna administrativna podrška."
+msgstr ""
+"Preparation and signing of the contract before a notary public. Registration"
+" of ownership in the real estate cadastre. Complete administrative support."
+
+msgid "Predaja ključeva i podrška nakon kupovine"
+msgstr "Handover and post-purchase support"
+
+msgid ""
+"Finalna inspekcija, primopredaja nekretnine i nastavak saradnje za sve što "
+"Vam je potrebno nakon kupovine — od renoviranja do upravljanja imovinom."
+msgstr ""
+"Final inspection, handover of the property and continued cooperation for "
+"everything you need after the purchase — from renovation to property "
+"management."
+
+msgid "Pravni okvir"
+msgstr "Legal framework"
+
+msgid "Osnove"
+msgstr "The basics"
+
+msgid ""
+"Strani državljani u Srbiji mogu kupiti nekretnine pod uslovom reciprociteta "
+"— što znači da državljani zemalja koje omogućavaju srpskim građanima "
+"kupovinu imaju ista prava. Ovo uključuje većinu EU država, Ujedinjeno "
+"Kraljevstvo i mnoge druge jurisdikcije. Postupak je transparentan i "
+"regulisan Zakonom o osnovama svojinskopravnih odnosa."
+msgstr ""
+"Foreign nationals in Serbia may buy property under the condition of "
+"reciprocity — meaning that nationals of countries that allow Serbian "
+"citizens to buy enjoy the same rights. This includes most EU states, the "
+"United Kingdom and many other jurisdictions. The procedure is transparent "
+"and regulated by the Law on the Fundamentals of Property Relations."
+
+msgid ""
+"Napomena: ovo nije pravni savet. Za specifične situacije, obezbeđujemo "
+"konsultacije sa proverenim pravnim ekspertima specijalizovanim za strano "
+"vlasništvo nad nekretninama u Srbiji."
+msgstr ""
+"Note: this is not legal advice. For specific situations, we arrange "
+"consultations with trusted legal experts specialised in foreign ownership of"
+" property in Serbia."
+
+msgid "Bankarstvo"
+msgstr "Banking"
+
+msgid "Finansije"
+msgstr "Finance"
+
+msgid "Bankarstvo i finansiranje"
+msgstr "Banking and financing"
+
+msgid ""
+"Srbija nudi relativno otvoreno bankarsko okruženje za strane investitore. "
+"Otvaranje računa je moguće za nerezidente, a nekoliko banaka nudi "
+"hipotekarne kredite za strane kupce. Transakcije se najčešće obavljaju u "
+"evrima, što eliminiše devizni rizik za većinu evropskih kupaca."
+msgstr ""
+"Serbia offers a relatively open banking environment for foreign investors. "
+"Opening an account is possible for non-residents, and several banks offer "
+"mortgage loans to foreign buyers. Transactions are most often conducted in "
+"euros, which eliminates currency risk for most European buyers."
+
+msgid "Relokacija"
+msgstr "Relocation"
+
+msgid "Opciono"
+msgstr "Optional"
+
+msgid "Servis preseljenja"
+msgstr "Relocation service"
+
+msgid ""
+"Za klijente koji planiraju preseljenje u Beograd, možemo koordinirati "
+"kompletnu logistiku — od pronalaženja privremenog smeštaja i upisa dece u "
+"škole, do otvaranja bankovnog računa i povezivanja sa lokalnom zajednicom "
+"ekspata."
+msgstr ""
+"For clients planning to relocate to Belgrade, we can coordinate the complete"
+" logistics — from finding temporary accommodation and enrolling children in "
+"schools, to opening a bank account and connecting with the local expat "
+"community."
+
+msgid ""
+"Dozvolite nam da Vas provedemo kroz proces sticanja premium nekretnine u "
+"Beogradu."
+msgstr ""
+"Let us guide you through the process of acquiring a premium property in "
+"Belgrade."
+
+msgid "Privatna kolekcija hero"
+msgstr "Private collection hero"
+
+msgid ""
+"Odabrane nekretnine nisu javno oglašene i dostupne su isključivo "
+"kvalifikovanim klijentima."
+msgstr ""
+"Selected properties are not publicly listed and are available exclusively to"
+" qualified clients."
+
+msgid "O privatnoj kolekciji"
+msgstr "About the private collection"
+
+msgid ""
+"Naša Privatna kolekcija obuhvata pažljivo selektovane nekretnine koje nikada"
+" nisu javno oglašene. Pristup je rezervisan za kvalifikovane klijente nakon "
+"kratkog intake procesa. Svaka nekretnina u kolekciji prolazi rigorozan "
+"selekcioni proces — od lokacije i kvaliteta gradnje do potencijala za rast "
+"vrednosti."
+msgstr ""
+"Our Private Collection comprises carefully selected properties that have "
+"never been publicly listed. Access is reserved for qualified clients after a"
+" brief intake process. Every property in the collection goes through a "
+"rigorous selection process — from location and build quality to potential "
+"for value growth."
+
+msgid "Zahtev za pristup"
+msgstr "Access request"
+
+msgid "Pristup"
+msgstr "Access"
+
+msgid "Zatražite pristup"
+msgstr "Request access"
+
+msgid "Tip nekretnine"
+msgstr "Property type"
+
+msgid "Zatraži pristup"
+msgstr "Request access"
+
+msgid "Odabrane nekretnine hero"
+msgstr "Featured properties hero"
+
+msgid "Kolekcija"
+msgstr "Collection"
+
+msgid ""
+"Pažljivo selektovane nekretnine koje definišu vrhunski standard života u "
+"Beogradu."
+msgstr ""
+"Carefully selected properties that define the highest standard of living in "
+"Belgrade."
+
+msgid "Filteri"
+msgstr "Filters"
+
+msgid "Lokacija"
+msgstr "Location"
+
+msgid "Npr. Dedinje"
+msgstr "E.g. Dedinje"
+
+msgid "Svi tipovi"
+msgstr "All types"
+
+msgid "Sve"
+msgstr "All"
+
+msgid "Raspon cena (€)"
+msgstr "Price range (€)"
+
+msgid "Minimalna cena"
+msgstr "Minimum price"
+
+msgid "Maksimalna cena"
+msgstr "Maximum price"
+
+msgid "Spavaće sobe"
+msgstr "Bedrooms"
+
+msgid "Ključna reč"
+msgstr "Keyword"
+
+msgid "Pretraga po naslovu"
+msgstr "Search by title"
+
+msgid "Resetuj filtere"
+msgstr "Reset filters"
+
+msgid "Primeni filtere"
+msgstr "Apply filters"
+
+msgid "nekretnina"
+msgstr "properties"
+
+msgid "Nema nekretnina koje odgovaraju izabranim filterima."
+msgstr "No properties match the selected filters."
+
+msgid "Galerija fotografija"
+msgstr "Photo gallery"
+
+msgid "Virtuelna tura"
+msgstr "Virtual tour"
+
+msgid "Galerija thumbnails"
+msgstr "Thumbnail gallery"
+
+msgid "Detalji nekretnine"
+msgstr "Property details"
+
+msgid "Karakteristike"
+msgstr "Features"
+
+msgid "Osnova"
+msgstr "Floor plan"
+
+msgid "Preuzmi floor plan"
+msgstr "Download floor plan"
+
+msgid "Mapa lokacije"
+msgstr "Location map"
+
+msgid "tačna adresa dostupna na upit"
+msgstr "exact address available on request"
+
+msgid "Stambena površina"
+msgstr "Living area"
+
+msgid "Ukupna površina"
+msgstr "Total area"
+
+msgid "Kupatila"
+msgstr "Bathrooms"
+
+msgid "Garažna mesta"
+msgstr "Parking spaces"
+
+msgid "Sprat"
+msgstr "Floor"
+
+msgid "Godina gradnje"
+msgstr "Year built"
+
+msgid "Kontakt agent"
+msgstr "Contact the agent"
+
+msgid "Sajt (ostavite prazno)"
+msgstr "Website (leave blank)"
+
+msgid "Zakažite privatnu prezentaciju"
+msgstr "Book a private viewing"
+
+msgid "Zatvori galeriju"
+msgstr "Close the gallery"
+
+msgid "Prethodna fotografija"
+msgstr "Previous photo"
+
+msgid "Sledeća fotografija"
+msgstr "Next photo"

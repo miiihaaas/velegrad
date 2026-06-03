@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n l10n %}
+{% load static i18n l10n i18n_content %}
 
 {% comment %}
   Story 3.2 — Property Detail stranica + agent-contact mini Inquiry(viewing) forma.
@@ -14,7 +14,8 @@
      dugme uklonjeno (Epik 4.2).
    - Honeypot polje `website` skriveno preko .sr-only + aria-hidden/tabindex=-1.
    - Mapa: SAMO kad show_map (lat+lng+show_address); init guard `typeof L`.
-   - {% loc %} NE postoji (Epik 6) — direktno _sr.
+   - Story 6.1: {% loc %} aktivan (description / feature name / founder_title);
+     property.title OSTAJE plain {{ property.title }} (nije _sr/_en polje).
 {% endcomment %}
 
 {% block title %}{{ property.title }} — Velegrad Estate{% endblock %}
@@ -70,8 +71,8 @@
           <div class="detail-description fade-in-section">
             <p class="eyebrow mb-md">{{ property.get_property_type_display }} — {{ property.location_district }}, {{ property.location_city }}</p>
             <h2 class="mb-md">{{ property.title }}</h2>
-            {# |safe opravdan: description_sr je admin-curated HTMLField (TinyMCE). #}
-            {{ property.description_sr|safe }}
+            {% comment %}|safe opravdan: description je admin-curated HTMLField (TinyMCE). loc|safe je sintaksno nemoguće → assign-pa-|safe na promenljivoj.{% endcomment %}
+            {% loc property "description" as description %}{{ description|safe }}
           </div>
 
           <!-- Block 4 — Features / Amenities -->
@@ -86,7 +87,7 @@
                        budu razlikovne i hookable za icon sistem. Placeholder SVG ostaje
                        jer dizajn koristi per-amenity inline SVG bez čistog name->path mapiranja. #}
                     <svg class="amenity-item__icon icon-{{ f.icon }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3m0 12v3M3 12h3m12 0h3"/></svg>
-                    {{ f.name_sr }}
+                    {% loc f "name" %}
                   </div>
                 {% endfor %}
               </div>
@@ -190,7 +191,7 @@
           {% endif %}
           <div class="agent-block__info">
             <h3>{{ site_settings.founder_name }}</h3>
-            <p>{{ site_settings.founder_title_sr }}</p>
+            <p>{% loc site_settings "founder_title" %}</p>
           </div>
         </div>
 

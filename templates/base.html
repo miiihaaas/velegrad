@@ -1,5 +1,10 @@
-{% load static i18n %}<!doctype html>
-<html lang="sr">
+{% load static i18n i18n_content %}<!doctype html>
+{# Story 6.1: aktivni jezik (sr/en). LANGUAGE_CODE iz i18n context procesora je
+   "sr"/"en"; slice na 2 znaka daje "sr"/"en". SR je no-prefix default
+   (LANGUAGE_CODE="sr" je članica LANGUAGES), pa {% translate_url 'sr' %} daje
+   putanju bez prefiksa, a {% translate_url 'en' %} putanju sa /en/ prefiksom. #}
+{% with lang_code=LANGUAGE_CODE|slice:":2" %}
+<html lang="{{ lang_code }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -55,10 +60,11 @@
       </nav>
 
       <div class="d-flex gap-sm" style="align-items: center;">
+        {% comment %}Story 6.1: GET <a href> linkovi preko translate_url (čuvaju tekuću putanju, samo dodaju/skidaju /en/ prefiks). BEZ set_language POST forme, BEZ csrf_token — nema CSRF zamke. is-active iz aktivnog jezika.{% endcomment %}
         <div class="lang-switcher hide-mobile">
-          <button class="lang-switcher__btn is-active" data-lang="sr" aria-label="{% trans 'Srpski' %}">{% trans "SR" %}</button>
+          <a class="lang-switcher__btn{% if lang_code == 'sr' %} is-active{% endif %}" href="{% translate_url 'sr' %}" aria-label="{% trans 'Srpski' %}">{% trans "SR" %}</a>
           <span class="lang-switcher__sep">|</span>
-          <button class="lang-switcher__btn" data-lang="en" aria-label="{% trans 'Engleski' %}">{% trans "EN" %}</button>
+          <a class="lang-switcher__btn{% if lang_code == 'en' %} is-active{% endif %}" href="{% translate_url 'en' %}" aria-label="{% trans 'Engleski' %}">{% trans "EN" %}</a>
         </div>
         <button class="mobile-menu-toggle" aria-label="{% trans 'Otvori meni' %}" aria-expanded="false">
           <span></span>
@@ -116,10 +122,11 @@
       </div>
       <div class="site-footer__bottom">
         <p class="site-footer__copyright">{% trans "Velegrad Estate © 2026" %}</p>
+        {# Story 6.1: footer switcher — isti GET {% translate_url %} pristup kao header. #}
         <div class="lang-switcher">
-          <button class="lang-switcher__btn is-active" data-lang="sr" aria-label="{% trans 'Srpski' %}">{% trans "SR" %}</button>
+          <a class="lang-switcher__btn{% if lang_code == 'sr' %} is-active{% endif %}" href="{% translate_url 'sr' %}" aria-label="{% trans 'Srpski' %}">{% trans "SR" %}</a>
           <span class="lang-switcher__sep">|</span>
-          <button class="lang-switcher__btn" data-lang="en" aria-label="{% trans 'Engleski' %}">{% trans "EN" %}</button>
+          <a class="lang-switcher__btn{% if lang_code == 'en' %} is-active{% endif %}" href="{% translate_url 'en' %}" aria-label="{% trans 'Engleski' %}">{% trans "EN" %}</a>
         </div>
       </div>
     </div>
@@ -129,3 +136,4 @@
   {% block extra_js %}{% endblock %}
 </body>
 </html>
+{% endwith %}

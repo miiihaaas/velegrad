@@ -80,6 +80,12 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    # LocaleMiddleware (Story 6.1) — čita aktivni jezik iz URL prefiksa/sesije/
+    # cookie-ja. Django ZAHTEVA da bude STROGO posle SessionMiddleware i STROGO
+    # pre CommonMiddleware (CommonMiddleware radi APPEND_SLASH redirekciju koja
+    # mora videti već razrešen jezik). i18n_patterns(prefix_default_language=False)
+    # u config/urls.py mu daje /en/ prefiks; SR (default) ostaje bez prefiksa.
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -98,6 +104,10 @@ TEMPLATES = [
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
+                # i18n context processor (Story 6.1) — izlaže {{ LANGUAGE_CODE }}
+                # (aktivni jezik: "en" pod /en/, "sr" pod SR default) template-ima
+                # za <html lang="{{ LANGUAGE_CODE }}">.
+                "django.template.context_processors.i18n",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "core.context_processors.site_settings",
@@ -161,7 +171,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # --------------------------------------------------------------------------- #
 # Internationalization                                                         #
 # --------------------------------------------------------------------------- #
-LANGUAGE_CODE = "sr-latn"
+# LANGUAGE_CODE MORA biti članica LANGUAGES da bi SR bio istinski no-prefix jezik
+# (Story 6.1 bug fix M1). Django izostavlja URL prefiks SAMO kada
+# get_language() == LANGUAGE_CODE. Sa "sr-latn" (koje NIJE u LANGUAGES) Locale-
+# Middleware za neprefiksiran SR zahtev aktivira "sr", a translate_url('sr') daje
+# get_language()=="sr" != "sr-latn" -> Django pogrešno DODAJE /sr/ prefiks. Postavlja-
+# njem na "sr" (članica LANGUAGES) SR ostaje bez prefiksa i switcher SR link je tačan.
+# localized() koristi get_language()[:2] pa "sr" radi identično; "sr" vs "sr-latn"
+# razlika u formatiranju datuma/brojeva je zanemarljiva za ovaj sajt.
+LANGUAGE_CODE = "sr"
 TIME_ZONE = "Europe/Belgrade"
 USE_I18N = True
 USE_TZ = True

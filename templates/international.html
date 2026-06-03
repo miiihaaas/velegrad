@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n i18n_content %}
 
 {% comment %}
   Story 4.1 — International stranica iz CMS-a (Page slug="international").
@@ -7,15 +7,16 @@
 
   Konvencije (LOCKED):
    - {% extends "base.html" %}; zadržava site-header/site-footer okvir.
-   - |safe ISKLJUČIVO na page.content_sr (admin-curated TinyMCE HTMLField, intl-intro).
-   - page.title_sr → plain {{ }} auto-escape (NE |safe, NE .localized() u {{ }}).
+   - |safe ISKLJUČIVO na page content HTMLField (admin-curated TinyMCE, intl-intro)
+     preko obrasca {% loc page "content" as var %}{{ var|safe }}.
+   - page title → {% loc %} (aktivni jezik + _sr fallback), plain auto-escape.
    - Kuriran 6-korak timeline (01–06) + tematske sekcije = STATIČKI {% trans %}
-     skelet (NE u content_sr — TinyMCE ne bi trebalo da nosi složen markup).
+     skelet (NE u content — TinyMCE ne bi trebalo da nosi složen markup).
    - CTA href HARDKODOVAN apsolutni "/contact/" (Contact je 4.2 — NE {% url %}).
-   - {% loc %}/.localized() u {{ }} ne postoje (Epik 6); /en/ prefiks ne postoji.
+   - Story 6.1: {% loc %} aktivan; /en/ prefiks aktivan (i18n_patterns).
 {% endcomment %}
 
-{% block title %}{{ page.title_sr }} — Velegrad Estate{% endblock %}
+{% block title %}{% loc page "title" %} — Velegrad Estate{% endblock %}
 
 {% block meta_description %}
   {% if page.meta_description %}
@@ -34,7 +35,7 @@
   <section class="intl-hero" aria-label="{% trans 'Međunarodni klijenti hero' %}">
     <div class="container">
       <p class="eyebrow mb-sm">{% trans "Za međunarodne kupce" %}</p>
-      <h1>{{ page.title_sr }}</h1>
+      <h1>{% loc page "title" %}</h1>
       <p class="intl-hero__tagline">{% trans "Vaš vodič za kupovinu premium nekretnina u Beogradu, Srbija." %}</p>
     </div>
   </section>
@@ -42,7 +43,7 @@
   <!-- ════ Uvod (admin-curated content_sr) ════ -->
   <section class="section fade-in-section" aria-label="{% trans 'Uvod' %}" style="padding-block-start: 0;">
     <div class="container intl-intro">
-      {{ page.content_sr|safe }}
+      {% loc page "content" as content %}{{ content|safe }}
     </div>
   </section>
 

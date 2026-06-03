@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n i18n_content %}
 
 {% comment %}
   Story 2.2 — Home stranica povezana sa bazom.
@@ -32,11 +32,11 @@
     <div class="hero__overlay"></div>
     <div class="hero__content">
       <p class="hero__kicker">
-        {% if site_settings.founder_name %}{{ site_settings.founder_name }}{% if site_settings.founder_title_sr %} — {{ site_settings.founder_title_sr }}{% endif %}{% else %}{% trans "Privatni savetnik za premium nekretnine" %}{% endif %}
+        {% if site_settings.founder_name %}{{ site_settings.founder_name }}{% loc site_settings "founder_title" as founder_title %}{% if founder_title %} — {{ founder_title }}{% endif %}{% else %}{% trans "Privatni savetnik za premium nekretnine" %}{% endif %}
       </p>
-      <h1 class="hero__tagline">{{ site_settings.hero_headline_sr }}</h1>
+      <h1 class="hero__tagline">{% loc site_settings "hero_headline" %}</h1>
       <div class="hero__cta">
-        <a href="/" class="btn btn--ghost btn--lg">{{ site_settings.hero_cta_text_sr }}</a>
+        <a href="/" class="btn btn--ghost btn--lg">{% loc site_settings "hero_cta_text" %}</a>
       </div>
     </div>
   </section>
@@ -52,10 +52,11 @@
         <div class="advisor__content">
           <p class="eyebrow">{% trans "Osnivač i privatni savetnik" %}</p>
           <h2 class="advisor__name">{{ site_settings.founder_name }}</h2>
-          <p class="advisor__title">{{ site_settings.founder_title_sr }}</p>
+          <p class="advisor__title">{% loc site_settings "founder_title" %}</p>
           <hr class="separator">
-          {# founder_bio_sr je admin-curated (singleton, samo superuser uređuje) → |safe je bezbedan. #}
-          <div class="advisor__text">{{ site_settings.founder_bio_sr|safe }}</div>
+          {% comment %}founder_bio je admin-curated HTMLField (singleton, samo superuser uređuje) → |safe je bezbedan. loc|safe je sintaksno nemoguće → assign-pa-|safe na promenljivoj.{% endcomment %}
+          {% loc site_settings "founder_bio" as founder_bio %}
+          <div class="advisor__text">{{ founder_bio|safe }}</div>
           <div class="advisor__contact">
             {% if site_settings.phone_primary %}<a href="tel:{{ site_settings.phone_primary }}" class="btn btn--primary btn--sm">{% trans "Pozovi direktno" %}</a>{% endif %}
             {% if site_settings.whatsapp_number %}<a href="https://wa.me/{{ site_settings.whatsapp_number }}" class="btn btn--champagne btn--sm" target="_blank" rel="noopener">{% trans "WhatsApp" %}</a>{% endif %}
@@ -191,7 +192,7 @@
     </div>
   </section>
 
-  <!-- ════ Section F — Contact Teaser ════ -->
+  <!-- ════ Sekcija F — Kontakt teaser ════ -->
   <section class="section" aria-label="{% trans 'Kontakt' %}">
     <div class="container">
       <div class="contact-teaser">

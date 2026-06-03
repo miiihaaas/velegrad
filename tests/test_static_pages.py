@@ -553,30 +553,30 @@ def test_international_route_reverses_to_expected_path():
 
 
 @pytest.mark.django_db
-def test_en_international_returns_404_no_i18n_patterns(client):
-    # AC3b (smoke-marker): GET /en/international/ -> 404, proving i18n_patterns /
-    # the /en/ prefix was NOT introduced in 4.1 (that is Epik 6). This is a
-    # NEGATIVE smoke-check that /en/ routing is absent, NOT positive EN content.
+def test_en_international_returns_200_with_i18n_patterns(client):
+    # AC3b (INVERTED by Story 6.1): GET /en/international/ -> 200, proving
+    # i18n_patterns / the /en/ prefix IS now introduced (Epik 6). Was a NEGATIVE
+    # 404 smoke-check pre-6.1; now a positive EN-route resolution check.
     _seed_site_settings()
     _seed_page("international", INTL_TITLE, INTL_CONTENT)
     resp = client.get("/en/international/")
-    assert resp.status_code == 404, (
-        "GET /en/international/ must return 404 — 4.1 must NOT add i18n_patterns / "
-        f"the /en/ prefix (that is Epik 6), got {resp.status_code} (AC3b)."
+    assert resp.status_code == 200, (
+        "GET /en/international/ must return 200 — 6.1 adds i18n_patterns / "
+        f"the /en/ prefix, got {resp.status_code} (AC3b)."
     )
 
 
 @pytest.mark.django_db
-def test_en_about_returns_404_no_i18n_patterns(client):
-    # AC3b (TEST_GAP — i18n smoke symmetry): GET /en/about/ -> 404, proving
-    # i18n_patterns / the /en/ prefix was NOT introduced in 4.1 (that is Epik 6).
-    # Mirrors test_en_international_returns_404_no_i18n_patterns.
+def test_en_about_returns_200_with_i18n_patterns(client):
+    # AC3b (INVERTED by Story 6.1): GET /en/about/ -> 200, proving i18n_patterns /
+    # the /en/ prefix IS now introduced (Epik 6). Mirrors
+    # test_en_international_returns_200_with_i18n_patterns.
     _seed_site_settings()
     _seed_page("about", ABOUT_TITLE, ABOUT_CONTENT)
     resp = client.get("/en/about/")
-    assert resp.status_code == 404, (
-        "GET /en/about/ must return 404 — 4.1 must NOT add i18n_patterns / "
-        f"the /en/ prefix (that is Epik 6), got {resp.status_code} (AC3b)."
+    assert resp.status_code == 200, (
+        "GET /en/about/ must return 200 — 6.1 adds i18n_patterns / "
+        f"the /en/ prefix, got {resp.status_code} (AC3b)."
     )
 
 

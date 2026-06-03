@@ -674,13 +674,15 @@ def test_private_collection_route_reverses_to_expected_path():
 
 
 @pytest.mark.django_db
-def test_en_private_collection_route_is_404(client):
-    # AC5 (i18n boundary): there is NO i18n_patterns / /en/ prefix (Epik 6) ->
-    # GET /en/private-collection/ must be 404.
+def test_en_private_collection_route_is_200(client):
+    # AC5 (i18n boundary — INVERTED by Story 6.1): i18n_patterns now wraps the
+    # localizable routes with the /en/ prefix, so GET /en/private-collection/ is
+    # 200 (was 404 pre-6.1). SiteSettings is seeded so the footer renders.
+    _seed_site_settings()
     resp = client.get("/en/private-collection/")
-    assert resp.status_code == 404, (
-        f"GET /en/private-collection/ must be 404 (no i18n routing in 5.1), got "
-        f"{resp.status_code} (AC5)."
+    assert resp.status_code == 200, (
+        f"GET /en/private-collection/ must be 200 (i18n_patterns introduced in "
+        f"6.1), got {resp.status_code} (AC5)."
     )
 
 
