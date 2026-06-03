@@ -613,7 +613,12 @@ def test_str_methods_sensible():
     )
     assert "Marko" in str(inq), "Inquiry.__str__ should include the name"
 
-    page = Page.objects.create(slug="about", title_sr="O nama", title_en="About")
+    # update_or_create (NOT create): 0002_seed_static_pages seeds Page(slug='about')
+    # into the test DB at migration time, so a plain create() would raise
+    # IntegrityError on the unique slug.
+    page, _ = Page.objects.update_or_create(
+        slug="about", defaults=dict(title_sr="O nama", title_en="About"),
+    )
     assert str(page) in ("about", "O nama"), "Page.__str__ should be slug or title_sr"
 
 

@@ -126,20 +126,34 @@ def _seed_site_settings(**overrides):
 
 
 def _seed_page(slug, title_sr, content_sr, is_active=True, **overrides):
-    """Create a Page. title_sr AND content_sr are required (else IntegrityError);
-    title_en/content_en are blank=True so "" is fine.
+    """Create-or-update a Page with the given fields. title_sr AND content_sr are
+    required by the schema; title_en/content_en are blank=True so "" is fine.
+
+    Uses update_or_create (NOT create) because the 0002_seed_static_pages data
+    migration already seeds Page(slug='about'/'international') into the test DB at
+    migration time — a plain create() would raise IntegrityError on the unique
+    slug. update_or_create overwrites ALL the fields under test, so the test's
+    sentinels/precondition still hold whether or not the row pre-exists.
+
+    NOTE: meta_title/meta_description are explicitly reset to "" in the base
+    defaults so they DON'T leak from the seed-migration row — the original
+    create() produced a row with blank meta_*, and the <head> tests rely on
+    meta_title being empty (so {% block title %} falls back to title_sr). Tests
+    that need a meta value pass it via **overrides (which win over the reset).
     """
     Page = _get_model("pages", "Page")
     defaults = dict(
-        slug=slug,
         title_sr=title_sr,
         title_en="",
         content_sr=content_sr,
         content_en="",
+        meta_title="",
+        meta_description="",
         is_active=is_active,
     )
     defaults.update(overrides)
-    return Page.objects.create(**defaults)
+    obj, _ = Page.objects.update_or_create(slug=slug, defaults=defaults)
+    return obj
 
 
 def _make_property(**overrides):
@@ -453,7 +467,11 @@ def test_international_cta_links_hardcoded_contact(client):
 def test_about_unseeded_returns_404(client):
     # AC3a: with NO Page(slug="about") seeded, GET /about/ -> 404 (intentional MVP
     # gating, NOT a graceful "coming soon" placeholder).
+    # NOTE: 0002_seed_static_pages seeds Page(slug='about') into the test DB at
+    # migration time; delete it here to re-establish the genuine "unseeded"
+    # precondition this AC describes (the 404-when-absent assertion is unchanged).
     _seed_site_settings()
+    _get_model("pages", "Page").objects.filter(slug="about").delete()
     resp = client.get("/about/")
     assert resp.status_code == 404, (
         "GET /about/ with no seeded Page(slug='about') must return 404 (intentional "
@@ -464,7 +482,11 @@ def test_about_unseeded_returns_404(client):
 @pytest.mark.django_db
 def test_international_unseeded_returns_404(client):
     # AC3a: with NO Page(slug="international") seeded, GET /international/ -> 404.
+    # NOTE: 0002_seed_static_pages seeds Page(slug='international') at migration
+    # time; delete it to re-establish the genuine "unseeded" precondition (the
+    # 404-when-absent assertion is unchanged).
     _seed_site_settings()
+    _get_model("pages", "Page").objects.filter(slug="international").delete()
     resp = client.get("/international/")
     assert resp.status_code == 404, (
         "GET /international/ with no seeded Page(slug='international') must return "
@@ -784,4 +806,58 @@ def test_no_root_catch_all_unknown_slug_404(client):
     assert resp.status_code == 404, (
         "a non-existent root path must return 404 (no root catch-all "
         f"path(\"<slug>/\")), got {resp.status_code} (AC5)."
+    )
+
+
+# =========================================================================== #
+# Seed migration (0002_seed_static_pages) — pages render WITHOUT explicit       #
+# per-test seeding (the data migration populated the test DB at setup).         #
+# =========================================================================== #
+# Sentinels mirror 0002_seed_static_pages — proves the SEEDED row (not an
+# in-test create) reached the render. Kept loose (title + a stable phrase) so
+# an admin refining the prose later does not over-couple these tests.
+SEED_ABOUT_TITLE = "Privatno savetovanje"
+SEED_ABOUT_PHRASE = "Kako radimo"
+SEED_INTL_TITLE = "Međunarodni klijenti"
+SEED_INTL_PHRASE = "međunarodne investitore u nekretnine"
+
+
+@pytest.mark.django_db
+def test_about_renders_from_seed_migration_without_explicit_seeding(client):
+    # The 0002_seed_static_pages data migration runs during test-DB setup, so
+    # Page(slug="about") exists WITHOUT any _seed_page call here. GET /about/ must
+    # be 200 and render the seeded title_sr + a phrase from the seeded content_sr.
+    # This is the regression that guards the production fix: /about/ no longer 404s.
+    _seed_site_settings()
+    resp, html = _get_about(client)
+    assert resp.status_code == 200, (
+        f"GET /about/ must return 200 from the seed-migration row (no explicit "
+        f"_seed_page), got {resp.status_code}."
+    )
+    assert SEED_ABOUT_TITLE in html, (
+        f"the about-hero <h1> must render the seeded title_sr {SEED_ABOUT_TITLE!r}."
+    )
+    assert SEED_ABOUT_PHRASE in html, (
+        f"the about-bio must render a phrase from the seeded content_sr "
+        f"({SEED_ABOUT_PHRASE!r})."
+    )
+
+
+@pytest.mark.django_db
+def test_international_renders_from_seed_migration_without_explicit_seeding(client):
+    # Mirror for International: Page(slug="international") is seeded by
+    # 0002_seed_static_pages at test-DB setup; GET /international/ -> 200 and renders
+    # the seeded title_sr + a phrase from the seeded content_sr (intl-intro).
+    _seed_site_settings()
+    resp, html = _get_intl(client)
+    assert resp.status_code == 200, (
+        f"GET /international/ must return 200 from the seed-migration row (no "
+        f"explicit _seed_page), got {resp.status_code}."
+    )
+    assert SEED_INTL_TITLE in html, (
+        f"the intl-hero <h1> must render the seeded title_sr {SEED_INTL_TITLE!r}."
+    )
+    assert SEED_INTL_PHRASE in html, (
+        f"the intl-intro must render a phrase from the seeded content_sr "
+        f"({SEED_INTL_PHRASE!r})."
     )

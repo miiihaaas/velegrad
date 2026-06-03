@@ -145,10 +145,14 @@ def _seed_site_settings(**overrides):
 
 
 def _seed_page(slug, title_sr, content_sr="<p>Sadrzaj</p>", **overrides):
-    """Create a Page (title_sr + content_sr required; *_en blank=True)."""
+    """Create-or-update a Page (title_sr + content_sr required; *_en blank=True).
+
+    Uses update_or_create (NOT create) because 0002_seed_static_pages already
+    seeds Page(slug='about'/'international') into the test DB at migration time —
+    a plain create() would raise IntegrityError on the unique slug.
+    """
     Page = _get_model("pages", "Page")
     defaults = dict(
-        slug=slug,
         title_sr=title_sr,
         title_en="",
         content_sr=content_sr,
@@ -156,7 +160,8 @@ def _seed_page(slug, title_sr, content_sr="<p>Sadrzaj</p>", **overrides):
         is_active=True,
     )
     defaults.update(overrides)
-    return Page.objects.create(**defaults)
+    obj, _ = Page.objects.update_or_create(slug=slug, defaults=defaults)
+    return obj
 
 
 def _detail_path(slug):

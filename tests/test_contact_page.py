@@ -191,12 +191,17 @@ def _make_property(**overrides):
 
 
 def _seed_page(slug, title_sr, content_sr="<p>Sadrzaj</p>", **overrides):
-    """Seed a static CMS Page (about/international regression — AC6)."""
+    """Seed a static CMS Page (about/international regression — AC6).
+
+    Uses update_or_create (NOT create) because 0002_seed_static_pages already
+    seeds Page(slug='about'/'international') into the test DB at migration time —
+    a plain create() would raise IntegrityError on the unique slug.
+    """
     Page = _get_model("pages", "Page")
-    defaults = dict(slug=slug, title_sr=title_sr, content_sr=content_sr,
-                    is_active=True)
+    defaults = dict(title_sr=title_sr, content_sr=content_sr, is_active=True)
     defaults.update(overrides)
-    return Page.objects.create(**defaults)
+    obj, _ = Page.objects.update_or_create(slug=slug, defaults=defaults)
+    return obj
 
 
 # =========================================================================== #

@@ -61,13 +61,15 @@
       </div>
 
       <nav class="site-nav" aria-label="{% trans 'Glavna navigacija' %}">
-        {# is-active se izvodi iz request.path (context_processors.request je uključen), pa svaka stranica koja {% extends 'base.html' %} dobija ispravan aktivni link — ne hardkodovano. #}
-        <a href="/" class="{% if request.path == '/' %}is-active{% endif %}">{% trans "Početna" %}</a>
-        <a href="{% url 'about' %}">{% trans "Privatno savetovanje" %}</a>
-        <a href="{% url 'properties' %}">{% trans "Odabrane nekretnine" %}</a>
-        <a href="{% url 'private-collection' %}">{% trans "Privatna kolekcija" %}</a>
-        <a href="{% url 'international' %}">{% trans "Međunarodni klijenti" %}</a>
-        <a href="{% url 'contact' %}">{% trans "Kontakt" %}</a>
+        {# is-active se izvodi iz request.resolver_match.url_name (locale-agnostičan: isto ime sa /en/ prefiksom ili bez), pa svaka stranica koja {% extends 'base.html' %} dobija ispravan aktivni link — ne hardkodovano, radi i pod EN locale-om. Na 404 strani je resolver_match None -> active je prazan -> nijedan link nije aktivan (željeno ponašanje). #}
+        {% with active=request.resolver_match.url_name %}
+        <a href="/" class="{% if active == 'home' %}is-active{% endif %}">{% trans "Početna" %}</a>
+        <a href="{% url 'about' %}" class="{% if active == 'about' %}is-active{% endif %}">{% trans "Privatno savetovanje" %}</a>
+        <a href="{% url 'properties' %}" class="{% if active == 'properties' or active == 'property-detail' %}is-active{% endif %}">{% trans "Odabrane nekretnine" %}</a>
+        <a href="{% url 'private-collection' %}" class="{% if active == 'private-collection' %}is-active{% endif %}">{% trans "Privatna kolekcija" %}</a>
+        <a href="{% url 'international' %}" class="{% if active == 'international' %}is-active{% endif %}">{% trans "Međunarodni klijenti" %}</a>
+        <a href="{% url 'contact' %}" class="{% if active == 'contact' %}is-active{% endif %}">{% trans "Kontakt" %}</a>
+        {% endwith %}
       </nav>
 
       <div class="d-flex gap-sm" style="align-items: center;">
@@ -88,13 +90,15 @@
 
   <!-- Mobile Menu -->
   <div class="mobile-menu" role="dialog" aria-label="{% trans 'Mobilni meni' %}">
-    {# is-active na home linku, dosledno desktop navigaciji (request.path; context_processors.request je uključen). #}
-    <a href="/" class="{% if request.path == '/' %}is-active{% endif %}">{% trans "Početna" %}</a>
-    <a href="{% url 'about' %}">{% trans "Privatno savetovanje" %}</a>
-    <a href="{% url 'properties' %}">{% trans "Odabrane nekretnine" %}</a>
-    <a href="{% url 'private-collection' %}">{% trans "Privatna kolekcija" %}</a>
-    <a href="{% url 'international' %}">{% trans "Međunarodni klijenti" %}</a>
-    <a href="{% url 'contact' %}">{% trans "Kontakt" %}</a>
+    {# is-active dosledno desktop navigaciji: isti request.resolver_match.url_name mehanizam (locale-agnostičan, radi i pod /en/). #}
+    {% with active=request.resolver_match.url_name %}
+    <a href="/" class="{% if active == 'home' %}is-active{% endif %}">{% trans "Početna" %}</a>
+    <a href="{% url 'about' %}" class="{% if active == 'about' %}is-active{% endif %}">{% trans "Privatno savetovanje" %}</a>
+    <a href="{% url 'properties' %}" class="{% if active == 'properties' or active == 'property-detail' %}is-active{% endif %}">{% trans "Odabrane nekretnine" %}</a>
+    <a href="{% url 'private-collection' %}" class="{% if active == 'private-collection' %}is-active{% endif %}">{% trans "Privatna kolekcija" %}</a>
+    <a href="{% url 'international' %}" class="{% if active == 'international' %}is-active{% endif %}">{% trans "Međunarodni klijenti" %}</a>
+    <a href="{% url 'contact' %}" class="{% if active == 'contact' %}is-active{% endif %}">{% trans "Kontakt" %}</a>
+    {% endwith %}
   </div>
 
   {% block content %}{% endblock %}
