@@ -1089,3 +1089,39 @@ def test_virtual_tour_https_scheme_renders(client):
     assert 'href="https://tour.example/12345"' in html, (
         "a valid https virtual_tour_url must render as a clickable link (S2)."
     )
+
+
+@pytest.mark.django_db
+def test_property_detail_reverses_and_resolves_unicode_slug(client):
+    # Regresija: Property.slug se generiše sa slugify(title, allow_unicode=True),
+    # pa može sadržati ne-ASCII znakove (ćčšžđ). URL ruta mora da ih razreši
+    # (uslug konverter u config/urls.py); inače reverse() puca NoReverseMatch
+    # (i HomeView 500-uje na home card {% url 'property-detail' slug=p.slug %}).
+    prop = _make_property(title="Kuća Zlatibor Planinski Mir")
+    assert any(ord(ch) > 127 for ch in prop.slug), (
+        f"test pretpostavlja unicode slug (allow_unicode=True); dobijen ASCII '{prop.slug}'"
+    )
+    # reverse() ranije pucao NoReverseMatch (ASCII <slug:> konverter); sada radi
+    # (uslug konverter). reverse percent-enkoduje ne-ASCII (npr. ć -> %C4%87) —
+    # to je očekivano i browser/Django ga dekodiraju pri resolve-u.
+    url = reverse("property-detail", kwargs={"slug": prop.slug})
+    assert url.startswith("/properties/") and url.endswith("/"), url
+    resp = client.get(url)
+    assert resp.status_code == 200, (
+        "GET property-detail sa unicode slug-om mora vratiti 200 (uslug konverter)."
+    )
+
+
+@pytest.mark.django_db
+def test_home_renders_featured_property_with_unicode_slug(client):
+    # Regresija HomeView NoReverseMatch: featured kartica na home strani renderuje
+    # {% url 'property-detail' slug=p.slug %}; sa unicode slug-om to je 500-ovalo
+    # pre uslug konvertera. is_featured=True jer HomeView filtrira featured signature.
+    _seed_site_settings()
+    prop = _make_property(title="Kuća Zlatibor Planinski Mir", is_featured=True)
+    expected_href = reverse("property-detail", kwargs={"slug": prop.slug})
+    resp = client.get("/")
+    assert resp.status_code == 200, "Home mora da se renderuje (bez NoReverseMatch)."
+    assert f'href="{expected_href}"' in resp.content.decode("utf-8"), (
+        "home featured kartica mora linkovati na property-detail (percent-encoded unicode slug)."
+    )

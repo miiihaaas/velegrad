@@ -96,7 +96,7 @@
               <div class="property-card__price">
                 {% if p.price_on_request or p.status == "price_on_request" %}{% trans "Cena na upit" %}{% else %}€{{ p.price|floatformat:0 }}{% endif %}
               </div>
-              <a href="/properties/" class="property-card__cta">{% trans "Detaljnije" %}</a>
+              <a href="{% url 'property-detail' slug=p.slug %}" class="property-card__cta">{% trans "Detaljnije" %}</a>
             </div>
           </article>
         {% empty %}

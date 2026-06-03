@@ -1,8 +1,8 @@
 {% load static i18n i18n_content %}<!doctype html>
-{# Story 6.1: aktivni jezik (sr/en). LANGUAGE_CODE iz i18n context procesora je
+{% comment %}Story 6.1: aktivni jezik (sr/en). LANGUAGE_CODE iz i18n context procesora je
    "sr"/"en"; slice na 2 znaka daje "sr"/"en". SR je no-prefix default
-   (LANGUAGE_CODE="sr" je članica LANGUAGES), pa {% translate_url 'sr' %} daje
-   putanju bez prefiksa, a {% translate_url 'en' %} putanju sa /en/ prefiksom. #}
+   (LANGUAGE_CODE="sr" je clanica LANGUAGES), pa translate_url 'sr' daje
+   putanju bez prefiksa, a translate_url 'en' putanju sa /en/ prefiksom.{% endcomment %}
 {% with lang_code=LANGUAGE_CODE|slice:":2" %}
 <html lang="{{ lang_code }}">
 <head>
@@ -52,11 +52,11 @@
       <nav class="site-nav" aria-label="{% trans 'Glavna navigacija' %}">
         {# is-active se izvodi iz request.path (context_processors.request je uključen), pa svaka stranica koja {% extends 'base.html' %} dobija ispravan aktivni link — ne hardkodovano. #}
         <a href="/" class="{% if request.path == '/' %}is-active{% endif %}">{% trans "Početna" %}</a>
-        <a href="#">{% trans "Privatno savetovanje" %}</a>
-        <a href="#">{% trans "Odabrane nekretnine" %}</a>
-        <a href="#">{% trans "Privatna kolekcija" %}</a>
-        <a href="#">{% trans "Međunarodni klijenti" %}</a>
-        <a href="#">{% trans "Kontakt" %}</a>
+        <a href="{% url 'about' %}">{% trans "Privatno savetovanje" %}</a>
+        <a href="{% url 'properties' %}">{% trans "Odabrane nekretnine" %}</a>
+        <a href="{% url 'private-collection' %}">{% trans "Privatna kolekcija" %}</a>
+        <a href="{% url 'international' %}">{% trans "Međunarodni klijenti" %}</a>
+        <a href="{% url 'contact' %}">{% trans "Kontakt" %}</a>
       </nav>
 
       <div class="d-flex gap-sm" style="align-items: center;">
@@ -79,11 +79,11 @@
   <div class="mobile-menu" role="dialog" aria-label="{% trans 'Mobilni meni' %}">
     {# is-active na home linku, dosledno desktop navigaciji (request.path; context_processors.request je uključen). #}
     <a href="/" class="{% if request.path == '/' %}is-active{% endif %}">{% trans "Početna" %}</a>
-    <a href="#">{% trans "Privatno savetovanje" %}</a>
-    <a href="#">{% trans "Odabrane nekretnine" %}</a>
-    <a href="#">{% trans "Privatna kolekcija" %}</a>
-    <a href="#">{% trans "Međunarodni klijenti" %}</a>
-    <a href="#">{% trans "Kontakt" %}</a>
+    <a href="{% url 'about' %}">{% trans "Privatno savetovanje" %}</a>
+    <a href="{% url 'properties' %}">{% trans "Odabrane nekretnine" %}</a>
+    <a href="{% url 'private-collection' %}">{% trans "Privatna kolekcija" %}</a>
+    <a href="{% url 'international' %}">{% trans "Međunarodni klijenti" %}</a>
+    <a href="{% url 'contact' %}">{% trans "Kontakt" %}</a>
   </div>
 
   {% block content %}{% endblock %}
@@ -107,16 +107,16 @@
           <p class="site-footer__nav-title">{% trans "Stranice" %}</p>
           <ul class="site-footer__nav">
             <li><a href="/">{% trans "Početna" %}</a></li>
-            <li><a href="#">{% trans "Privatno savetovanje" %}</a></li>
-            <li><a href="#">{% trans "Odabrane nekretnine" %}</a></li>
-            <li><a href="#">{% trans "Privatna kolekcija" %}</a></li>
+            <li><a href="{% url 'about' %}">{% trans "Privatno savetovanje" %}</a></li>
+            <li><a href="{% url 'properties' %}">{% trans "Odabrane nekretnine" %}</a></li>
+            <li><a href="{% url 'private-collection' %}">{% trans "Privatna kolekcija" %}</a></li>
           </ul>
         </div>
         <div>
           <p class="site-footer__nav-title">{% trans "Više" %}</p>
           <ul class="site-footer__nav">
-            <li><a href="#">{% trans "Međunarodni klijenti" %}</a></li>
-            <li><a href="#">{% trans "Kontakt" %}</a></li>
+            <li><a href="{% url 'international' %}">{% trans "Međunarodni klijenti" %}</a></li>
+            <li><a href="{% url 'contact' %}">{% trans "Kontakt" %}</a></li>
           </ul>
         </div>
       </div>

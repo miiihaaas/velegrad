@@ -22,9 +22,9 @@
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/pages/property-detail.css' %}">
-  {# Leaflet (eksterna mrežna zavisnost — CDN; init je guardovan typeof L).
+  {% comment %}Leaflet (eksterna mrežna zavisnost — CDN; init je guardovan typeof L).
      S3: SRI integrity + crossorigin/referrerpolicy hardening (Leaflet 1.9.4).
-     TODO (pre-production, arhitektura §4): vendoring u static/vendor/leaflet/. #}
+     TODO (pre-production, arhitektura §4): vendoring u static/vendor/leaflet/.{% endcomment %}
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin="anonymous" referrerpolicy="no-referrer">
@@ -82,10 +82,10 @@
               <div class="amenity-grid">
                 {% for f in features %}
                   <div class="amenity-item" data-icon="{{ f.icon }}">
-                    {# f.icon je CharField (icon slug/CSS klasa) — render-uje se kao klasa
+                    {% comment %}f.icon je CharField (icon slug/CSS klasa) — render-uje se kao klasa
                        (auto-escape, BEZ |safe) + data-icon da različite karakteristike
                        budu razlikovne i hookable za icon sistem. Placeholder SVG ostaje
-                       jer dizajn koristi per-amenity inline SVG bez čistog name->path mapiranja. #}
+                       jer dizajn koristi per-amenity inline SVG bez čistog name->path mapiranja.{% endcomment %}
                     <svg class="amenity-item__icon icon-{{ f.icon }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3m0 12v3M3 12h3m12 0h3"/></svg>
                     {% loc f "name" %}
                   </div>

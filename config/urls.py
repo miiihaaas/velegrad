@@ -10,10 +10,32 @@ je već normalizovana (bez kose crte); Django's path() zahteva prateću kosu crt
 from django.conf import settings
 from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, register_converter
 
 from pages.views import ContactView, HomeView, PrivateCollectionView, page_view
 from properties.views import PropertyDetailView, PropertyListView
+
+
+class UnicodeSlugConverter:
+    """Slug konverter koji prihvata unicode slug-ove (npr. ``kuća-zlatibor``).
+
+    ``Property.slug`` se generiše sa ``slugify(title, allow_unicode=True)``
+    (properties/models.py), pa može sadržati ne-ASCII znakove (ćčšžđ...).
+    Ugrađeni Django ``<slug:>`` konverter je ASCII-only (``[-a-zA-Z0-9_]+``),
+    pa unicode slug ne bi razrešio (NoReverseMatch pri reverse / 404 pri GET).
+    ``\\w`` u str regex-u je unicode-aware, pa pokriva i ASCII i unicode slug-ove.
+    """
+
+    regex = r"[-\w]+"
+
+    def to_python(self, value):
+        return value
+
+    def to_url(self, value):
+        return value
+
+
+register_converter(UnicodeSlugConverter, "uslug")
 
 # Ne-lokalizabilne rute (Story 6.1) — OSTAJU VAN i18n_patterns (bez /en/ prefiksa):
 #  - admin (ADMIN_URL): NFR-5 — admin putanja je deterministička, ne sme nositi
@@ -44,7 +66,7 @@ urlpatterns += i18n_patterns(
     # putanju pa nema kolizije. Hardkodovani /properties/<slug>/ hrefovi iz
     # 3.1/2.2 sada vode na ovu živu rutu.
     path(
-        "properties/<slug:slug>/",
+        "properties/<uslug:slug>/",
         PropertyDetailView.as_view(),
         name="property-detail",
     ),
