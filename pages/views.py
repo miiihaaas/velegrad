@@ -35,7 +35,10 @@ class HomeView(TemplateView):
 
 
 @method_decorator(
-    ratelimit(key="ip", rate="5/h", method="POST", block=True), name="post"
+    ratelimit(
+        key="core.ratelimit.client_ip_key", rate="5/h", method="POST", block=True
+    ),
+    name="post",
 )
 class ContactView(View):
     """Public Contact page + 4-field Inquiry(general) form (Story 4.2).
@@ -86,7 +89,10 @@ class ContactView(View):
 
 
 @method_decorator(
-    ratelimit(key="ip", rate="5/h", method="POST", block=True), name="post"
+    ratelimit(
+        key="core.ratelimit.client_ip_key", rate="5/h", method="POST", block=True
+    ),
+    name="post",
 )
 class PrivateCollectionView(View):
     """Javna Private Collection stranica + 5-poljna Inquiry(private_collection)

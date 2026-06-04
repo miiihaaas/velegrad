@@ -21,20 +21,81 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # --------------------------------------------------------------------------- #
+# Shared cache — django-redis (Story 6.4 AC6a)                                 #
+# --------------------------------------------------------------------------- #
+# base.py drži LocMemCache (po-procesu) — OK za dev/test (jedan proces). U prod-u
+# Gunicorn vrti VIŠE worker-a, pa po-procesni cache cepa django-ratelimit brojač
+# (svaki worker svoj limit → curenje limita). Override-ujemo `default` na DELJENI
+# Redis backend vođen env-om (CACHE_URL, alias REDIS_URL). Backend je STRING dotted
+# path → Django ga lenjo razrešava, pa import prod.py NE zahteva instaliran
+# django_redis (test suite na SQLite-u ostaje zelen bez Redis-a).
+# Lokaciju cache-a razrešavamo eksplicitno, jednim lookup-om po env-u (bez ugnežđenog
+# eager env() u default-u — django-environ bi unutrašnji env() izvršio i kad je spoljni
+# postavljen). Redosled: CACHE_URL ima prednost; ako nije postavljen, koristi se REDIS_URL;
+# ako ni jedan nije postavljen, pada na lokalni Redis default (dev/staging na istom hostu).
+CACHE_LOCATION = env("CACHE_URL", default=None) or env(  # noqa: F405
+    "REDIS_URL", default="redis://127.0.0.1:6379/1"
+)  # noqa: F405
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": CACHE_LOCATION,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
+
+# Eksplicitno vežemo django-ratelimit za `default` cache alias. Prod override-uje
+# `default` na DELJENI Redis (gore), pa je rate-limit brojač konzistentan preko svih
+# Gunicorn worker-a. Eksplicitna vrednost štiti od budućeg uvođenja zasebnog cache
+# alias-a (npr. odvojen `sessions` cache) — ratelimit ostaje vezan baš za Redis `default`.
+RATELIMIT_USE_CACHE = "default"
+
+# --------------------------------------------------------------------------- #
+# System checks (Story 6.4 AC6c)                                               #
+# --------------------------------------------------------------------------- #
+# base.py utišava django_ratelimit.E003/W001 jer LocMemCache nije deljen cache.
+# Deljeni Redis cache (gore) obara taj razlog → prod NE sme utišavati te provere.
+# Eksplicitno praznimo listu da dev/test utišavanje ne procuri u prod.
+SILENCED_SYSTEM_CHECKS = []
+
+# --------------------------------------------------------------------------- #
+# Rate-limit key — non-spoofable client IP (Story 6.4 AC6b)                     #
+# --------------------------------------------------------------------------- #
+# Non-spoofable resolver je core.ratelimit.client_ip_key, a NA NJEGA su DIREKTNO
+# vezani @ratelimit dekoratori u pages/views.py i properties/views.py preko
+# key="core.ratelimit.client_ip_key" (django-ratelimit 4.x import_string-uje dotted
+# putanju i poziva je kao keyfn(group, request)). NEMA `RATELIMIT_KEY` setting-a —
+# django-ratelimit 4.x ga NE čita (potvrđeno u django_ratelimit/core.py), pa bi to
+# bila mrtva (lažno-umirujuća) konfiguracija.
+#
+# IPWARE_TRUSTED_PROXY_LIST je sekundarni put unutar resolver-a (primarni je
+# Nginx-ov X-Real-IP). Default je localhost Nginx (deploy/nginx.conf proxy-ja sa
+# istog hosta).
+IPWARE_TRUSTED_PROXY_LIST = env.list("IPWARE_TRUSTED_PROXY_LIST", default=["127.0.0.1"])  # noqa: F405
+
+# --------------------------------------------------------------------------- #
 # Email (Story 5.2) — django-anymail Mailgun backend                           #
 # --------------------------------------------------------------------------- #
 # Kredencijali ISKLJUČIVO iz env-a (NFR-5) — NIKAD hardkodovani.
 EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 
+# Story 6.4 AC4 — eksplicitan Mailgun send-timeout u sekundama (~10s). Vrednost se
+# prosleđuje anymail-u kao ANYMAIL["REQUESTS_TIMEOUT"] (vidi dole).
+MAILGUN_SEND_TIMEOUT = 10
+
 ANYMAIL = {
     "MAILGUN_API_KEY": env("MAILGUN_API_KEY"),  # noqa: F405
     "MAILGUN_SENDER_DOMAIN": env("MAILGUN_SENDER_DOMAIN"),  # noqa: F405
+    # Story 6.4 AC4 — eksplicitan send-timeout (~10s). anymail NEMA default timeout,
+    # pa spor Mailgun može zauvek blokirati request thread. requests-based backend
+    # prosleđuje REQUESTS_TIMEOUT requests pozivu. Sinhrono slanje sa timeout-om —
+    # async stek (broker) je VAN MVP obima.
+    "REQUESTS_TIMEOUT": MAILGUN_SEND_TIMEOUT,
 }
 # Contract assert (AC4/NFR-5): prod mora čitati ključ iz env-a — env("MAILGUN_API_KEY").
 # Fail-fast: BEZ default="" — django-environ podiže ImproperlyConfigured pri učitavanju
 # settings-a ako MAILGUN_API_KEY / MAILGUN_SENDER_DOMAIN nisu postavljeni (ispravno za
 # prod: nepodešen mailer pada odmah na startu, ne tek na prvom Mailgun 401 pri slanju).
-# NAPOMENA (Story 6.4 — TRACKED): sinhrono slanje preko anymail Mailgun backend-a NEMA
-# send-timeout (anymail nema REQUESTS_TIMEOUT). Pri deploy-u (Story 6.4) OBAVEZNO dodati
-# send timeout — custom requests session ili prebacivanje slanja u async (Celery) — jer
-# spor Mailgun može blokirati request thread bez timeout-a.

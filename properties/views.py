@@ -120,7 +120,10 @@ class PropertyListView(ListView):
 
 
 @method_decorator(
-    ratelimit(key="ip", rate="5/h", method="POST", block=True), name="post"
+    ratelimit(
+        key="core.ratelimit.client_ip_key", rate="5/h", method="POST", block=True
+    ),
+    name="post",
 )
 class PropertyDetailView(View):
     """Public Property Detail page + agent-contact mini Inquiry(viewing) form.

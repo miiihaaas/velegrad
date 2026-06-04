@@ -2,3 +2,10 @@
 
 # Production-only
 gunicorn
+
+# Shared cache backend (Story 6.4 AC6a) — django-ratelimit brojač deljen među
+# Gunicorn worker-ima preko Redis-a.
+django-redis>=5.4,<6.0
+
+# Non-spoofable client IP iza Nginx-a (Story 6.4 AC6b) — core.ratelimit.client_ip_key.
+django-ipware>=7.0,<8.0

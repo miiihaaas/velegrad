@@ -122,6 +122,16 @@ urlpatterns += i18n_patterns(
     prefix_default_language=False,
 )
 
+# Media serviranje u DEV-u (DEBUG=True) — Django runserver automatski servira samo
+# STATIC_URL (preko staticfiles app-a), ali NE i MEDIA_URL. Bez ovog helper-a
+# upload-ovane slike (/media/...) vraćaju 404 lokalno iako fajl postoji na disku.
+# U PRODUKCIJI media servira Nginx (`location /media/`, Story 6.4) — zato je blok
+# uslovljen na DEBUG i ne utiče na prod.
+if settings.DEBUG:
+    from django.conf.urls.static import static
+
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 # Eksplicitni custom 404 handler (Story 2.1, AC5) — premium 404.html unutar
 # baznog okvira sa HTTP statusom 404 (aktivno kada je DEBUG=False).
 handler404 = "pages.views.custom_404"

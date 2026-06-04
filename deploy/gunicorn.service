@@ -1,0 +1,34 @@
+# systemd unit za Velegrad CMS — Gunicorn WSGI server (Story 6.4 AC1).
+# Versionisani ŠABLON (bez kredencijala). Na VPS-u:
+#   sudo cp deploy/gunicorn.service /etc/systemd/system/velegrad.service
+#   sudo systemctl daemon-reload && sudo systemctl enable --now velegrad
+# Prilagoditi User/WorkingDirectory/putanje stvarnom deploy korisniku i app dir-u.
+
+[Unit]
+Description=Velegrad CMS Gunicorn daemon
+Requires=velegrad.socket
+After=network.target
+
+[Service]
+# Non-root aplikativni korisnik (NFR-5) — NIKAD root.
+User=velegrad
+Group=www-data
+WorkingDirectory=/srv/velegrad
+
+# Tajne i konfiguracija iz env fajla (NIJE u repo-u; chmod 600, vlasnik = velegrad (app korisnik)).
+EnvironmentFile=/srv/velegrad/.env
+Environment=DJANGO_SETTINGS_MODULE=config.settings.prod
+
+# Gunicorn vezan na Unix socket koji Nginx proxy-ja (ne TCP port).
+ExecStart=/srv/velegrad/.venv/bin/gunicorn config.wsgi:application \
+    --workers 3 \
+    --bind unix:/run/velegrad/gunicorn.sock \
+    --access-logfile - \
+    --error-logfile -
+
+Restart=always
+RestartSec=3
+RuntimeDirectory=velegrad
+
+[Install]
+WantedBy=multi-user.target
