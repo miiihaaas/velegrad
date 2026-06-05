@@ -70,23 +70,28 @@ class SiteSettings(LocalizedMixin, models.Model):
     """
 
     # Kontakt
-    phone_primary = models.CharField(max_length=30, blank=True)
-    whatsapp_number = models.CharField(max_length=20, blank=True)
-    email_primary = models.EmailField(blank=True)
-    email_inquiries = models.EmailField(blank=True)
-    address = models.TextField(blank=True)
+    phone_primary = models.CharField("Telefon", max_length=30, blank=True)
+    whatsapp_number = models.CharField("WhatsApp broj", max_length=20, blank=True)
+    email_primary = models.EmailField("Email", blank=True)
+    email_inquiries = models.EmailField("Email za upite", blank=True)
+    address = models.TextField("Adresa", blank=True)
 
     # Osnivač
-    founder_name = models.CharField(max_length=150, blank=True)
-    founder_title_sr = models.CharField(max_length=150, blank=True)
-    founder_title_en = models.CharField(max_length=150, blank=True)
+    founder_name = models.CharField("Ime osnivača", max_length=150, blank=True)
+    founder_title_sr = models.CharField(
+        "Titula osnivača (SR)", max_length=150, blank=True
+    )
+    founder_title_en = models.CharField(
+        "Titula osnivača (EN)", max_length=150, blank=True
+    )
     founder_photo = models.ImageField(
+        "Fotografija osnivača",
         upload_to="site/",
         blank=True,
         validators=[FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS)],
     )
-    founder_bio_sr = HTMLField(blank=True)
-    founder_bio_en = HTMLField(blank=True)
+    founder_bio_sr = HTMLField("Biografija (SR)", blank=True)
+    founder_bio_en = HTMLField("Biografija (EN)", blank=True)
 
     # WebP/srcset varijante za founder_photo (Story 6.3 — non-DB descriptors).
     founder_photo_webp_480 = webp_spec("founder_photo", 480)
@@ -94,17 +99,23 @@ class SiteSettings(LocalizedMixin, models.Model):
     founder_photo_webp_1440 = webp_spec("founder_photo", 1440)
 
     # Hero / homepage
-    hero_headline_sr = models.CharField(max_length=200, blank=True)
-    hero_headline_en = models.CharField(max_length=200, blank=True)
-    hero_cta_text_sr = models.CharField(max_length=80, blank=True)
-    hero_cta_text_en = models.CharField(max_length=80, blank=True)
+    hero_headline_sr = models.CharField("Hero naslov (SR)", max_length=200, blank=True)
+    hero_headline_en = models.CharField("Hero naslov (EN)", max_length=200, blank=True)
+    hero_cta_text_sr = models.CharField(
+        "Hero dugme — tekst (SR)", max_length=80, blank=True
+    )
+    hero_cta_text_en = models.CharField(
+        "Hero dugme — tekst (EN)", max_length=80, blank=True
+    )
     hero_image = models.ImageField(
+        "Hero slika",
         upload_to="site/",
         blank=True,
         validators=[FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS)],
     )
-    hero_video_url = models.URLField(blank=True)
+    hero_video_url = models.URLField("Hero video URL (zastarelo)", blank=True)
     hero_video = models.FileField(
+        "Hero video",
         upload_to="site/",
         blank=True,
         validators=[FileExtensionValidator(allowed_extensions=VIDEO_EXTENSIONS)],
@@ -122,12 +133,18 @@ class SiteSettings(LocalizedMixin, models.Model):
     hero_image_webp_1440 = webp_spec("hero_image", 1440)
 
     # Analitika
-    google_analytics_id = models.CharField(max_length=50, blank=True)
-    facebook_pixel_id = models.CharField(max_length=50, blank=True)
+    google_analytics_id = models.CharField(
+        "Google Analytics ID", max_length=50, blank=True
+    )
+    facebook_pixel_id = models.CharField(
+        "Facebook Pixel ID", max_length=50, blank=True
+    )
 
     # SEO
-    seo_default_title = models.CharField(max_length=70, blank=True)
-    seo_default_description = models.TextField(blank=True)
+    seo_default_title = models.CharField(
+        "SEO podrazumevani naslov", max_length=70, blank=True
+    )
+    seo_default_description = models.TextField("SEO podrazumevani opis", blank=True)
 
     class Meta:
         verbose_name = "Podešavanja sajta"

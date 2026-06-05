@@ -12,14 +12,14 @@ from core.models import LocalizedMixin
 class Page(LocalizedMixin, models.Model):
     """A bilingual static content page (§5.2)."""
 
-    slug = models.CharField(max_length=100, unique=True)
-    title_sr = models.CharField(max_length=200)
-    title_en = models.CharField(max_length=200, blank=True)
-    content_sr = HTMLField()
-    content_en = HTMLField(blank=True)
-    meta_title = models.CharField(max_length=70, blank=True)
-    meta_description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
+    slug = models.CharField("Slug (URL)", max_length=100, unique=True)
+    title_sr = models.CharField("Naslov (SR)", max_length=200)
+    title_en = models.CharField("Naslov (EN)", max_length=200, blank=True)
+    content_sr = HTMLField("Sadržaj (SR)")
+    content_en = HTMLField("Sadržaj (EN)", blank=True)
+    meta_title = models.CharField("Meta naslov (SEO)", max_length=70, blank=True)
+    meta_description = models.TextField("Meta opis (SEO)", blank=True)
+    is_active = models.BooleanField("Aktivna", default=True)
 
     class Meta:
         verbose_name = "Stranica"

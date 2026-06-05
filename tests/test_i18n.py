@@ -305,9 +305,9 @@ def test_admin_stays_outside_i18n_patterns(client, django_user_model):
 # =========================================================================== #
 @pytest.mark.django_db
 def test_sr_render_has_html_lang_sr(client):
-    # AC2: under SR (default, no prefix) the active language resolves to "sr"
-    # (LANGUAGE_CODE="sr-latn" is NOT in LANGUAGES -> resolves to "sr"), so
-    # <html lang="{{ LANGUAGE_CODE }}"> renders lang="sr".
+    # AC2: under SR (default, no prefix) the active language is "sr-latn"
+    # (LANGUAGE_CODE="sr-latn", a LANGUAGES member). base.html renders
+    # <html lang="{{ LANGUAGE_CODE|slice:':2' }}"> -> lang="sr".
     _seed_site_settings()
     resp = client.get("/")
     html = resp.content.decode("utf-8")
@@ -428,7 +428,7 @@ def test_switcher_links_back_to_sr_equivalent_from_en_page(client):
 @pytest.mark.django_db
 def test_sr_prefixed_urls_are_404_sr_is_no_prefix_only(client):
     # AC1 (guard — SR analog of the /en/ guards): SR is the no-prefix default
-    # (LANGUAGE_CODE="sr", prefix_default_language=False), so SR-prefixed URLs must
+    # (LANGUAGE_CODE="sr-latn", prefix_default_language=False), so SR-prefixed URLs must
     # NOT serve content. GET /sr/ and GET /sr/properties/ -> 404 (the M1 bug made
     # these unexpectedly 200, duplicating SR content under a /sr/ prefix).
     _seed_site_settings()

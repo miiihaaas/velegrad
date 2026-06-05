@@ -35,20 +35,29 @@ class Inquiry(models.Model):
         null=True,
         blank=True,
         related_name="inquiries",
+        verbose_name="Nekretnina",
     )
-    inquiry_type = models.CharField(max_length=20, choices=INQUIRY_TYPE_CHOICES)
-    name = models.CharField(max_length=150)
-    email = models.EmailField()
-    phone = models.CharField(max_length=30)
-    message = models.TextField()
-    preferred_language = models.CharField(max_length=5, choices=LANGUAGE_CHOICES)
-    budget_range = models.CharField(max_length=100, blank=True)
-    property_type_wanted = models.CharField(max_length=100, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="new")
-    notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    inquiry_type = models.CharField(
+        "Tip upita", max_length=20, choices=INQUIRY_TYPE_CHOICES
+    )
+    name = models.CharField("Ime i prezime", max_length=150)
+    email = models.EmailField("Email")
+    phone = models.CharField("Telefon", max_length=30)
+    message = models.TextField("Poruka")
+    preferred_language = models.CharField(
+        "Željeni jezik", max_length=5, choices=LANGUAGE_CHOICES
+    )
+    budget_range = models.CharField("Budžet", max_length=100, blank=True)
+    property_type_wanted = models.CharField(
+        "Željeni tip nekretnine", max_length=100, blank=True
+    )
+    status = models.CharField(
+        "Status", max_length=20, choices=STATUS_CHOICES, default="new"
+    )
+    notes = models.TextField("Napomene", blank=True)
+    created_at = models.DateTimeField("Datum upita", auto_now_add=True, db_index=True)
     # GDPR: lični podatak — retention/anonimizacija pre go-live (5.2)
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField("IP adresa", null=True, blank=True)
 
     class Meta:
         verbose_name = "Upit"

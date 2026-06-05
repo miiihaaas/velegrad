@@ -183,24 +183,29 @@ AUTH_PASSWORD_VALIDATORS = [
 # --------------------------------------------------------------------------- #
 # LANGUAGE_CODE MORA biti članica LANGUAGES da bi SR bio istinski no-prefix jezik
 # (Story 6.1 bug fix M1). Django izostavlja URL prefiks SAMO kada
-# get_language() == LANGUAGE_CODE. Sa "sr-latn" (koje NIJE u LANGUAGES) Locale-
-# Middleware za neprefiksiran SR zahtev aktivira "sr", a translate_url('sr') daje
-# get_language()=="sr" != "sr-latn" -> Django pogrešno DODAJE /sr/ prefiks. Postavlja-
-# njem na "sr" (članica LANGUAGES) SR ostaje bez prefiksa i switcher SR link je tačan.
-# localized() koristi get_language()[:2] pa "sr" radi identično; "sr" vs "sr-latn"
-# razlika u formatiranju datuma/brojeva je zanemarljiva za ovaj sajt.
+# get_language() == LANGUAGE_CODE.
+#
+# SR jezik je "sr-latn" (srpski LATINICA), a NE "sr" — jer Django kod "sr"
+# tretira kao srpsku ĆIRILICU i isporučuje ćirilične prevode za ceo ugrađeni
+# admin/contrib UI (dugmad, navigacija, auth labele, nazivi meseci, poruke
+# validacije formi). Da bi i admin i javni sajt renderovali LATINICU, koristimo
+# "sr-latn" (Django ima ugrađenu sr_Latn lokalizaciju) i — KLJUČNO — dodajemo
+# "sr-latn" u LANGUAGES da ostane istinski no-prefix jezik (M1 zahtev). Switcher
+# poziva {% translate_url 'sr-latn' %} pa SR link ostaje bez prefiksa.
+# localized() koristi get_language()[:2] == "sr" pa SR/EN fallback radi identično,
+# a <html lang="{{ LANGUAGE_CODE|slice:':2' }}"> i dalje daje lang="sr".
 # django.contrib.sites SITE_ID (Story 6.2) — sitemap framework ga zahteva za
 # apsolutne URL-ove preko Site.objects.get_current(). Default django_site red
 # (example.com) je OK za dev/test; prod (Story 6.4) postavlja Site.domain.
 SITE_ID = 1
 
-LANGUAGE_CODE = "sr"
+LANGUAGE_CODE = "sr-latn"
 TIME_ZONE = "Europe/Belgrade"
 USE_I18N = True
 USE_TZ = True
 
 LANGUAGES = [
-    ("sr", "Srpski"),
+    ("sr-latn", "Srpski"),
     ("en", "English"),
 ]
 

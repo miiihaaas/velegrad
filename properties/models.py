@@ -25,10 +25,12 @@ class PropertyFeature(LocalizedMixin, models.Model):
         ("legal", "Pravno"),
     ]
 
-    name_sr = models.CharField(max_length=100)
-    name_en = models.CharField(max_length=100)
-    icon = models.CharField(max_length=50)
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    name_sr = models.CharField("Naziv (SR)", max_length=100)
+    name_en = models.CharField("Naziv (EN)", max_length=100)
+    icon = models.CharField("Ikonica", max_length=50)
+    category = models.CharField(
+        "Kategorija", max_length=20, choices=CATEGORY_CHOICES
+    )
 
     class Meta:
         verbose_name = "Karakteristika"
@@ -64,44 +66,54 @@ class Property(LocalizedMixin, models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=255, unique=True, blank=True)
+    title = models.CharField("Naslov", max_length=200)
+    slug = models.SlugField("Slug (URL)", max_length=255, unique=True, blank=True)
 
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    status = models.CharField("Status", max_length=20, choices=STATUS_CHOICES)
     collection_type = models.CharField(
-        max_length=20, choices=COLLECTION_TYPE_CHOICES
+        "Tip kolekcije", max_length=20, choices=COLLECTION_TYPE_CHOICES
     )
-    property_type = models.CharField(max_length=20, choices=PROPERTY_TYPE_CHOICES)
+    property_type = models.CharField(
+        "Tip nekretnine", max_length=20, choices=PROPERTY_TYPE_CHOICES
+    )
 
-    location_city = models.CharField(max_length=100)
-    location_district = models.CharField(max_length=100)
-    location_address = models.CharField(max_length=255, blank=True)
-    show_address = models.BooleanField(default=False)
+    location_city = models.CharField("Grad", max_length=100)
+    location_district = models.CharField("Deo grada / opština", max_length=100)
+    location_address = models.CharField("Adresa", max_length=255, blank=True)
+    show_address = models.BooleanField("Prikaži adresu", default=False)
 
     price = models.DecimalField(
-        max_digits=12, decimal_places=2, null=True, blank=True
+        "Cena (€)", max_digits=12, decimal_places=2, null=True, blank=True
     )
-    price_on_request = models.BooleanField(default=False)
+    price_on_request = models.BooleanField("Cena na upit", default=False)
 
-    area_sqm = models.DecimalField(max_digits=8, decimal_places=2)
-    area_total_sqm = models.DecimalField(max_digits=8, decimal_places=2)
+    area_sqm = models.DecimalField(
+        "Stambena površina (m²)", max_digits=8, decimal_places=2
+    )
+    area_total_sqm = models.DecimalField(
+        "Ukupna površina (m²)", max_digits=8, decimal_places=2
+    )
 
-    bedrooms = models.IntegerField()
-    bathrooms = models.IntegerField()
-    floor = models.IntegerField()
-    total_floors = models.IntegerField()
-    parking_spaces = models.IntegerField()
-    year_built = models.IntegerField(null=True, blank=True)
+    bedrooms = models.IntegerField("Spavaće sobe")
+    bathrooms = models.IntegerField("Kupatila")
+    floor = models.IntegerField("Sprat")
+    total_floors = models.IntegerField("Ukupno spratova")
+    parking_spaces = models.IntegerField("Parking mesta")
+    year_built = models.IntegerField("Godina izgradnje", null=True, blank=True)
 
-    description_sr = HTMLField()
-    description_en = HTMLField()
-    description_fr = HTMLField(blank=True)
+    description_sr = HTMLField("Opis (SR)")
+    description_en = HTMLField("Opis (EN)")
+    description_fr = HTMLField("Opis (FR)", blank=True)
 
     features = models.ManyToManyField(
-        PropertyFeature, blank=True, related_name="properties"
+        PropertyFeature,
+        blank=True,
+        related_name="properties",
+        verbose_name="Karakteristike",
     )
 
     hero_image = models.ImageField(
+        "Glavna slika",
         upload_to="properties/hero/",
         validators=[FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS)],
     )
@@ -111,6 +123,7 @@ class Property(LocalizedMixin, models.Model):
     hero_image_webp_1440 = webp_spec("hero_image", 1440)
 
     floor_plan = models.FileField(
+        "Osnova (floor plan)",
         upload_to="properties/floorplans/",
         blank=True,
         validators=[
@@ -119,23 +132,23 @@ class Property(LocalizedMixin, models.Model):
             )
         ],
     )
-    virtual_tour_url = models.URLField(blank=True)
+    virtual_tour_url = models.URLField("URL virtuelne ture", blank=True)
 
     latitude = models.DecimalField(
-        max_digits=9, decimal_places=6, null=True, blank=True
+        "Geografska širina", max_digits=9, decimal_places=6, null=True, blank=True
     )
     longitude = models.DecimalField(
-        max_digits=9, decimal_places=6, null=True, blank=True
+        "Geografska dužina", max_digits=9, decimal_places=6, null=True, blank=True
     )
 
-    is_featured = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+    is_featured = models.BooleanField("Izdvojena", default=False)
+    is_active = models.BooleanField("Aktivna", default=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField("Kreirano", auto_now_add=True)
+    updated_at = models.DateTimeField("Ažurirano", auto_now=True)
 
-    meta_title = models.CharField(max_length=70, blank=True)
-    meta_description = models.TextField(blank=True)
+    meta_title = models.CharField("Meta naslov (SEO)", max_length=70, blank=True)
+    meta_description = models.TextField("Meta opis (SEO)", blank=True)
 
     class Meta:
         verbose_name = "Nekretnina"
@@ -181,15 +194,19 @@ class PropertyImage(models.Model):
     """A gallery image attached to a :class:`Property` (§5.2)."""
 
     property = models.ForeignKey(
-        Property, on_delete=models.CASCADE, related_name="images"
+        Property,
+        on_delete=models.CASCADE,
+        related_name="images",
+        verbose_name="Nekretnina",
     )
     image = models.ImageField(
+        "Slika",
         upload_to="properties/gallery/",
         validators=[FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS)],
     )
-    caption = models.CharField(max_length=255, blank=True)
-    order = models.IntegerField(default=0)
-    is_hero = models.BooleanField(default=False)
+    caption = models.CharField("Opis slike", max_length=255, blank=True)
+    order = models.IntegerField("Redosled", default=0)
+    is_hero = models.BooleanField("Glavna slika galerije", default=False)
 
     # WebP/srcset varijante za gallery image (Story 6.3 — non-DB descriptors).
     image_webp_480 = webp_spec("image", 480)

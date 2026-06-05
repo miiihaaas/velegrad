@@ -963,9 +963,11 @@ def test_sitesettings_admin_fieldsets_cover_all_groups():
         # Osnivač
         "founder_name", "founder_title_sr", "founder_title_en", "founder_photo",
         "founder_bio_sr", "founder_bio_en",
-        # Hero (tagline + CTA)
+        # Hero (tagline + CTA). NB: the hero video is the uploaded `hero_video`
+        # FileField (MP4/WebM/MOV) — the legacy `hero_video_url` YouTube field was
+        # removed from the form (a watch?v= URL can't be a background <video>).
         "hero_headline_sr", "hero_headline_en", "hero_cta_text_sr",
-        "hero_cta_text_en", "hero_image", "hero_video_url",
+        "hero_cta_text_en", "hero_image", "hero_video",
         # Analitika
         "google_analytics_id", "facebook_pixel_id",
         # SEO
