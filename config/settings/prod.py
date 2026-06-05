@@ -89,6 +89,12 @@ MAILGUN_SEND_TIMEOUT = 10
 ANYMAIL = {
     "MAILGUN_API_KEY": env("MAILGUN_API_KEY"),  # noqa: F405
     "MAILGUN_SENDER_DOMAIN": env("MAILGUN_SENDER_DOMAIN"),  # noqa: F405
+    # Story 6.4 — Mailgun region. anymail default je US (api.mailgun.net). EU domen
+    # MORA da gađa EU API (api.eu.mailgun.net), inače Mailgun vraća "domain not found".
+    # Region-agnostično: vodi se env-om; default ostaje US da postojeća konfiguracija ne pukne.
+    "MAILGUN_API_URL": env(  # noqa: F405
+        "MAILGUN_API_URL", default="https://api.mailgun.net/v3"
+    ),
     # Story 6.4 AC4 — eksplicitan send-timeout (~10s). anymail NEMA default timeout,
     # pa spor Mailgun može zauvek blokirati request thread. requests-based backend
     # prosleđuje REQUESTS_TIMEOUT requests pozivu. Sinhrono slanje sa timeout-om —
