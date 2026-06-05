@@ -112,7 +112,7 @@ class SiteSettingsAdmin(ModelAdmin):
                     ("hero_headline_sr", "hero_headline_en"),
                     ("hero_cta_text_sr", "hero_cta_text_en"),
                     "hero_image",
-                    "hero_video_url",
+                    "hero_video",
                 )
             },
         ),

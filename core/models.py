@@ -11,6 +11,7 @@ from imagekit.processors import ResizeToFit
 from tinymce.models import HTMLField
 
 IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp"]
+VIDEO_EXTENSIONS = ["mp4", "webm"]
 
 # --------------------------------------------------------------------------- #
 # WebP / responsive srcset varijante (Story 6.3, NFR-1)                         #
@@ -103,6 +104,15 @@ class SiteSettings(LocalizedMixin, models.Model):
         validators=[FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS)],
     )
     hero_video_url = models.URLField(blank=True)
+    hero_video = models.FileField(
+        upload_to="site/",
+        blank=True,
+        validators=[FileExtensionValidator(allowed_extensions=VIDEO_EXTENSIONS)],
+        help_text=(
+            "MP4 ili WebM video za hero pozadinu. Ako je postavljen, prikazuje se "
+            "umesto hero slike (slika ostaje kao poster/fallback dok se video učita)."
+        ),
+    )
 
     # WebP/srcset varijante za hero_image (Story 6.3 — non-DB descriptors).
     hero_image_webp_480 = webp_spec("hero_image", 480)

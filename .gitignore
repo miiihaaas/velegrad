@@ -36,3 +36,5 @@ htmlcov/
 .claude/
 _bmad/
 # NAPOMENA: _bmad-output/ (PRD, arhitektura, priče, sprint-status) SE prati — to su projektni artefakti.
+
+docs/deploy-handoff.md
