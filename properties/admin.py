@@ -16,7 +16,7 @@ from tinymce.models import HTMLField
 from tinymce.widgets import TinyMCE
 from unfold.admin import ModelAdmin, TabularInline
 
-from properties.models import Property, PropertyImage
+from properties.models import Property, PropertyFeature, PropertyImage
 
 
 class PropertyImageInline(SortableInlineAdminMixin, TabularInline):
@@ -31,6 +31,25 @@ class PropertyImageInline(SortableInlineAdminMixin, TabularInline):
     fields = ["image", "caption", "is_hero", "order"]
     ordering = ["order"]
     extra = 0
+
+
+@admin.register(PropertyFeature)
+class PropertyFeatureAdmin(ModelAdmin):
+    """Katalog karakteristika (amenity tagova) koje se biraju na nekretnini.
+
+    Bez ovog kataloga ``Property.features`` picker je prazan — ovde klijent
+    dodaje/uređuje oznake (Lift, Garaža, Bazen…) koje se onda biraju po
+    nekretnini.
+    """
+
+    list_display = ["name_sr", "name_en", "category", "icon"]
+    list_filter = ["category"]
+    search_fields = ["name_sr", "name_en"]
+    ordering = ["category", "name_sr"]
+    fieldsets = (
+        ("Naziv", {"fields": (("name_sr", "name_en"),)}),
+        ("Klasifikacija", {"fields": (("category", "icon"),)}),
+    )
 
 
 @admin.register(Property)

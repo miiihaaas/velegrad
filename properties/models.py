@@ -27,7 +27,16 @@ class PropertyFeature(LocalizedMixin, models.Model):
 
     name_sr = models.CharField("Naziv (SR)", max_length=100)
     name_en = models.CharField("Naziv (EN)", max_length=100)
-    icon = models.CharField("Ikonica", max_length=50)
+    icon = models.CharField(
+        "Ikonica",
+        max_length=50,
+        blank=True,
+        help_text=(
+            "Opciono. Slug ikonice (npr. pool, garage, elevator). Trenutno se "
+            "prikazuje generička ikonica za sve karakteristike; vrednost je "
+            "rezervisana za buduće setove ikonica."
+        ),
+    )
     category = models.CharField(
         "Kategorija", max_length=20, choices=CATEGORY_CHOICES
     )
