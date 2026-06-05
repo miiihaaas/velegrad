@@ -17,8 +17,9 @@ WEEKLY_DIR="${WEEKLY_DIR:-${BACKUP_DIR}/weekly}"
 DAILY_RETENTION_DAYS="${DAILY_RETENTION_DAYS:-${RETENTION_DAYS:-7}}"
 WEEKLY_RETENTION_DAYS="${WEEKLY_RETENTION_DAYS:-28}"
 
-# Offsite (Hetzner Storage Box preko rsync/SSH). Postaviti u env-u.
-OFFSITE_DEST="${OFFSITE_DEST:-u123456@u123456.your-storagebox.de:velegrad/media/}"
+# Offsite (Hetzner Storage Box preko rsync/SSH). Opciono — postaviti u env-u.
+# Prazno (default) => offsite se PRESKAČE (oslanjamo se na Hetzner snapshot celog servera).
+OFFSITE_DEST="${OFFSITE_DEST:-}"
 
 TS="$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$BACKUP_DIR" "$WEEKLY_DIR"
@@ -41,8 +42,13 @@ find "$BACKUP_DIR" -maxdepth 1 -name "media-*.tar.gz" -type f -mtime "+${DAILY_R
 find "$WEEKLY_DIR" -maxdepth 1 -name "media-*.tar.gz" -type f -mtime "+${WEEKLY_RETENTION_DAYS}" -delete
 
 # Offsite kopija — rsync media/ + arhive na storage box.
-echo "[$(date -Is)] offsite rsync media -> ${OFFSITE_DEST}"
-rsync -az "$BACKUP_DIR/" "$OFFSITE_DEST"
-rsync -az "$MEDIA_DIR/" "${OFFSITE_DEST}current/"
+# Preskače se ako OFFSITE_DEST nije postavljen (npr. kad se oslanjamo na Hetzner snapshot).
+if [ -n "$OFFSITE_DEST" ]; then
+    echo "[$(date -Is)] offsite rsync media -> ${OFFSITE_DEST}"
+    rsync -az "$BACKUP_DIR/" "$OFFSITE_DEST"
+    rsync -az "$MEDIA_DIR/" "${OFFSITE_DEST}current/"
+else
+    echo "[$(date -Is)] offsite preskočen (OFFSITE_DEST nije postavljen)"
+fi
 
 echo "[$(date -Is)] backup_media zavrsen OK"

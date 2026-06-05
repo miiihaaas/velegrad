@@ -20,8 +20,9 @@ DB_HOST="${DB_HOST:-127.0.0.1}"
 DAILY_RETENTION_DAYS="${DAILY_RETENTION_DAYS:-${RETENTION_DAYS:-7}}"
 WEEKLY_RETENTION_DAYS="${WEEKLY_RETENTION_DAYS:-28}"
 
-# Offsite (Hetzner Storage Box preko rsync/SSH). Postaviti u env-u.
-OFFSITE_DEST="${OFFSITE_DEST:-u123456@u123456.your-storagebox.de:velegrad/db/}"
+# Offsite (Hetzner Storage Box preko rsync/SSH). Opciono — postaviti u env-u.
+# Prazno (default) => offsite se PRESKAČE (oslanjamo se na Hetzner snapshot celog servera).
+OFFSITE_DEST="${OFFSITE_DEST:-}"
 
 TS="$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$BACKUP_DIR" "$WEEKLY_DIR"
@@ -47,7 +48,12 @@ find "$WEEKLY_DIR" -maxdepth 1 -name "${DB_NAME}-*.sql.gz" -type f -mtime "+${WE
 # Offsite kopija (rsync na storage box) — preživljava gubitak VPS-a.
 # BEZ --delete: rotacija/brisanje lokalnih dump-ova NE sme da obriše offsite kopije
 # (offsite mora preživeti i gubitak VPS-a i lokalnu retenciju).
-echo "[$(date -Is)] offsite rsync -> ${OFFSITE_DEST}"
-rsync -az "$BACKUP_DIR/" "$OFFSITE_DEST"
+# Preskače se ako OFFSITE_DEST nije postavljen (npr. kad se oslanjamo na Hetzner snapshot).
+if [ -n "$OFFSITE_DEST" ]; then
+    echo "[$(date -Is)] offsite rsync -> ${OFFSITE_DEST}"
+    rsync -az "$BACKUP_DIR/" "$OFFSITE_DEST"
+else
+    echo "[$(date -Is)] offsite preskočen (OFFSITE_DEST nije postavljen)"
+fi
 
 echo "[$(date -Is)] backup_db zavrsen OK"
