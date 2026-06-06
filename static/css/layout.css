@@ -308,9 +308,10 @@
   -webkit-backdrop-filter: blur(12px);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-md);
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: calc(64px + var(--space-md)) var(--space-md) var(--space-md);
+  gap: 0;
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--duration-normal) var(--ease-smooth);
@@ -323,14 +324,16 @@
 
 .mobile-menu a {
   font-family: var(--font-serif);
-  font-size: var(--text-2xl);
+  font-size: var(--text-lg);
   color: var(--color-text-primary);
   text-decoration: none;
-  padding: 0.5rem 1rem;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid rgba(245, 240, 232, 0.08);
   transition: color var(--duration-fast) var(--ease-smooth);
 }
 
-.mobile-menu a:hover {
+.mobile-menu a:hover,
+.mobile-menu a.is-active {
   color: var(--color-champagne);
 }
 
