@@ -581,7 +581,7 @@ def test_404_full_mandatory_trans_set_is_wrapped():
 @pytest.mark.django_db
 def test_base_includes_google_fonts_preconnect_and_link(client):
     # AC2: the head must wire Google Fonts — the preconnect hints plus the
-    # Bodoni Moda / DM Sans stylesheet link (faithful to the design head).
+    # Noto Serif Display / DM Sans stylesheet link (faithful to the design head).
     resp = client.get("/")
     assert resp.status_code == 200
     html = resp.content.decode("utf-8")
@@ -591,8 +591,8 @@ def test_base_includes_google_fonts_preconnect_and_link(client):
     assert "rel=\"preconnect\"" in html, (
         "base.html must include rel=\"preconnect\" hints for Google Fonts (AC2)."
     )
-    assert "Bodoni+Moda" in html and "DM+Sans" in html, (
-        "base.html must link the Bodoni Moda + DM Sans Google Fonts stylesheet (AC2)."
+    assert "Noto+Serif+Display" in html and "DM+Sans" in html, (
+        "base.html must link the Noto Serif Display + DM Sans Google Fonts stylesheet (AC2)."
     )
 
 

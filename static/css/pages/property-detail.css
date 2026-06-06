@@ -98,6 +98,14 @@
   border-bottom: 1px solid var(--color-border);
 }
 
+/* ── Lokacija / mapa ── */
+
+/* Champagne (topla) bordura usklađena sa brendom i markerom; vidljiva preko
+   tamnih CARTO pločica za razliku od neutralnog --color-border. */
+#property-map.map-placeholder {
+  border-color: var(--color-border-warm);
+}
+
 /* ── Description ── */
 
 .detail-description {
@@ -143,7 +151,13 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 0;
-  padding: var(--space-lg);
+  padding: var(--space-md);
+}
+
+@media (min-width: 768px) {
+  .agent-block {
+    padding: var(--space-lg);
+  }
 }
 
 .agent-block__header {

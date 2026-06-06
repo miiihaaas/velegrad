@@ -257,7 +257,7 @@
       if (typeof L !== 'undefined' && el && el.dataset.lat && el.dataset.lng) {
         var lat = parseFloat(el.dataset.lat);
         var lng = parseFloat(el.dataset.lng);
-        var map = L.map(el).setView([lat, lng], 14);
+        var map = L.map(el, { attributionControl: false }).setView([lat, lng], 14);
         // Monohromatska (tamna) podloga u tonu sajta umesto standardnih OSM boja.
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
           attribution: '&copy; OpenStreetMap &copy; CARTO',

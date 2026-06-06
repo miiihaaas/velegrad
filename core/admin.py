@@ -13,6 +13,7 @@ admin modules (``properties/admin.py`` / ``inquiries/admin.py``, architecture
 Rich list_display / filters / forms / fieldsets are out of scope here (1.4).
 """
 from django.contrib import admin
+from django.contrib.sites.models import Site
 from django.shortcuts import redirect
 from django.urls import reverse
 
@@ -23,6 +24,13 @@ from unfold.admin import ModelAdmin
 from core.models import SiteSettings
 from inquiries.models import Inquiry
 from properties.models import Property
+
+# django.contrib.sites je potreban za sitemap (SITE_ID=1), ali "Sajtovi" nema
+# šta da radi u klijentskom CMS-u -> skidamo ga iz admin panela (ne iz apps).
+try:
+    admin.site.unregister(Site)
+except admin.sites.NotRegistered:
+    pass
 
 
 def dashboard_callback(request, context):

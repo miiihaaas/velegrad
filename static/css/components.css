@@ -15,6 +15,7 @@
   letter-spacing: var(--letter-spacing-wide);
   text-transform: uppercase;
   text-decoration: none;
+  text-align: center;
   padding: 1rem 2rem;
   background-color: transparent;
   border: 1px solid rgba(245, 240, 232, 0.2);
