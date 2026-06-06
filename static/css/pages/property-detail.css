@@ -166,6 +166,15 @@
   font-size: var(--text-xl);
   font-weight: 400;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.agent-block__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 50%;
 }
 
 .agent-block__info h3 {
