@@ -80,7 +80,7 @@
               <div class="amenity-grid">
                 {% for f in features %}
                   <div class="amenity-item" data-icon="{{ f.icon }}">
-                    <svg class="amenity-item__icon icon-{{ f.icon }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3m0 12v3M3 12h3m12 0h3"/></svg>
+                    {% include "properties/_amenity_icon.html" with icon=f.icon %}
                     {% loc f "name" %}
                   </div>
                 {% endfor %}
@@ -192,9 +192,6 @@
           {% if site_settings.whatsapp_number %}
             <a href="https://wa.me/{{ site_settings.whatsapp_number }}" class="btn btn--champagne btn--sm" target="_blank" rel="noopener">WhatsApp</a>
           {% endif %}
-          {% if site_settings.email_primary %}
-            <a href="mailto:{{ site_settings.email_primary }}" class="btn btn--secondary btn--sm">Email</a>
-          {% endif %}
         </div>
 
         {% if request.GET.sent %}
@@ -261,10 +258,20 @@
         var lat = parseFloat(el.dataset.lat);
         var lng = parseFloat(el.dataset.lng);
         var map = L.map(el).setView([lat, lng], 14);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; OpenStreetMap'
+        // Monohromatska (tamna) podloga u tonu sajta umesto standardnih OSM boja.
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; OpenStreetMap &copy; CARTO',
+          subdomains: 'abcd',
+          maxZoom: 19
         }).addTo(map);
-        L.marker([lat, lng]).addTo(map);
+        // Marker u champagne boji brenda (umesto standardnog plavog pina).
+        L.circleMarker([lat, lng], {
+          radius: 9,
+          color: '#C9A96E',
+          weight: 3,
+          fillColor: '#C9A96E',
+          fillOpacity: 0.45
+        }).addTo(map);
       }
     });
   </script>

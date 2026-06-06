@@ -50,6 +50,12 @@
   line-height: 1.8;
 }
 
+/* Razmak između "O osnivaču" proze i "Kako radimo" naslova (CMS rich-text) */
+.about-bio h2 {
+  margin-block-start: var(--space-2xl, 3rem);
+  margin-block-end: var(--space-sm, 0.75rem);
+}
+
 /* ── Services ── */
 
 .services-list {

@@ -25,16 +25,47 @@ class PropertyFeature(LocalizedMixin, models.Model):
         ("legal", "Pravno"),
     ]
 
+    # Slug -> ikonica. Mora se poklapati sa granama u
+    # templates/properties/_amenity_icon.html. Prazno = generička ikonica.
+    ICON_CHOICES = [
+        ("air-conditioning", "Klima uređaj"),
+        ("underfloor-heating", "Podno grejanje"),
+        ("fireplace", "Kamin"),
+        ("kitchen", "Ugradna kuhinja"),
+        ("wardrobe", "Garderober / vešalica"),
+        ("smart-home", "Pametna kuća"),
+        ("terrace", "Terasa"),
+        ("pool", "Bazen"),
+        ("garden", "Vrt / drvo"),
+        ("view", "Pogled"),
+        ("bbq", "Roštilj"),
+        ("elevator", "Lift"),
+        ("garage", "Garaža"),
+        ("parking", "Parking"),
+        ("concierge", "Recepcija / zvonce"),
+        ("cctv", "Video nadzor"),
+        ("storage", "Ostava / kutija"),
+        ("registered", "Uknjiženo (dokument)"),
+        ("no-encumbrance", "Bez tereta (štit)"),
+        ("permit", "Dozvola (pečat)"),
+        ("wine-cellar", "Vinski podrum"),
+        ("security", "Obezbeđenje / alarm"),
+        ("gym", "Teretana"),
+        ("jacuzzi", "Đakuzi / spa"),
+        ("intercom", "Interfon"),
+        ("sauna", "Sauna"),
+    ]
+
     name_sr = models.CharField("Naziv (SR)", max_length=100)
     name_en = models.CharField("Naziv (EN)", max_length=100)
     icon = models.CharField(
         "Ikonica",
         max_length=50,
         blank=True,
+        choices=ICON_CHOICES,
         help_text=(
-            "Opciono. Slug ikonice (npr. pool, garage, elevator). Trenutno se "
-            "prikazuje generička ikonica za sve karakteristike; vrednost je "
-            "rezervisana za buduće setove ikonica."
+            "Izaberite ikonicu koja se prikazuje uz karakteristiku na stranici "
+            "nekretnine. Ostavite prazno za generičku ikonicu (kvačica)."
         ),
     )
     category = models.CharField(

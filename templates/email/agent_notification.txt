@@ -2,7 +2,7 @@
 ====================================================
 
 {% trans "Ime" %}: {{ name }}
-{% trans "Email" %}: {{ email }}
+Email: {{ email }}
 {% trans "Telefon" %}: {{ phone }}
 {% trans "Tip upita" %}: {{ inquiry_type_display }}
 {% if property %}{% trans "Nekretnina" %}: {{ property }}
