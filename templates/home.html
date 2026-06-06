@@ -26,7 +26,7 @@
       </p>
       <h1 class="hero__tagline">{% loc site_settings "hero_headline" %}</h1>
       <div class="hero__cta">
-        <a href="/" class="btn btn--ghost btn--lg">{% loc site_settings "hero_cta_text" %}</a>
+        <a href="/properties/" class="btn btn--ghost btn--lg">{% loc site_settings "hero_cta_text" %}</a>
       </div>
     </div>
   </section>
@@ -180,7 +180,7 @@
         <h2>{% trans "Zakažite razgovor" %}</h2>
         <p class="text-muted">{% trans "Svaki razgovor počinje razumevanjem Vaših potreba. Javite nam se direktno." %}</p>
         <div class="contact-teaser__links">
-          <a href="/" class="btn btn--primary">{% trans "Zakažite razgovor" %}</a>
+          <a href="{% url 'contact' %}" class="btn btn--primary">{% trans "Zakažite razgovor" %}</a>
           {% if site_settings.phone_primary %}<a href="tel:{{ site_settings.phone_primary }}" class="btn btn--secondary">{% trans "Pozovite direktno" %}</a>{% endif %}
         </div>
       </div>
