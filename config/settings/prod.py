@@ -77,31 +77,27 @@ SILENCED_SYSTEM_CHECKS = []
 IPWARE_TRUSTED_PROXY_LIST = env.list("IPWARE_TRUSTED_PROXY_LIST", default=["127.0.0.1"])  # noqa: F405
 
 # --------------------------------------------------------------------------- #
-# Email (Story 5.2) — django-anymail Mailgun backend                           #
+# Email (Story 5.2 / deploy) — SMTP preko Loopia mejl hostinga                  #
 # --------------------------------------------------------------------------- #
-# Kredencijali ISKLJUČIVO iz env-a (NFR-5) — NIKAD hardkodovani.
-EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+# Odluka (docs/deploy-handoff.md, 2026-06-05): NE Mailgun. Domen velegradbg.rs je
+# na Loopia hostingu čiji SPF (v=spf1 include:spf.loopia.se -all) VEĆ pokriva slanje
+# preko Loopia SMTP-a → dobra isporuka bez ikakve DNS izmene.
+#
+# Svi kredencijali ISKLJUČIVO iz env-a (NFR-5) — NIKAD hardkodovani. EMAIL_HOST /
+# EMAIL_HOST_USER / EMAIL_HOST_PASSWORD su FAIL-FAST (bez default-a): django-environ
+# diže ImproperlyConfigured pri učitavanju settings-a ako nisu postavljeni (ispravno
+# za prod — nepodešen mailer pada odmah na startu, ne tek na prvom SMTP auth fail-u).
+EMAIL_BACKEND = env(  # noqa: F405
+    "EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend"
+)
+EMAIL_HOST = env("EMAIL_HOST")  # npr. mailcluster.loopia.se  # noqa: F405
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")  # ceo mejl, npr. noreply@velegradbg.rs  # noqa: F405
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")  # lozinka iz Loopia panela  # noqa: F405
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)  # 587 STARTTLS (preporuka)  # noqa: F405
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)  # 587 STARTTLS  # noqa: F405
+EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)  # 465 SSL (alternativa TLS-u)  # noqa: F405
 
-# Story 6.4 AC4 — eksplicitan Mailgun send-timeout u sekundama (~10s). Vrednost se
-# prosleđuje anymail-u kao ANYMAIL["REQUESTS_TIMEOUT"] (vidi dole).
-MAILGUN_SEND_TIMEOUT = 10
-
-ANYMAIL = {
-    "MAILGUN_API_KEY": env("MAILGUN_API_KEY"),  # noqa: F405
-    "MAILGUN_SENDER_DOMAIN": env("MAILGUN_SENDER_DOMAIN"),  # noqa: F405
-    # Story 6.4 — Mailgun region. anymail default je US (api.mailgun.net). EU domen
-    # MORA da gađa EU API (api.eu.mailgun.net), inače Mailgun vraća "domain not found".
-    # Region-agnostično: vodi se env-om; default ostaje US da postojeća konfiguracija ne pukne.
-    "MAILGUN_API_URL": env(  # noqa: F405
-        "MAILGUN_API_URL", default="https://api.mailgun.net/v3"
-    ),
-    # Story 6.4 AC4 — eksplicitan send-timeout (~10s). anymail NEMA default timeout,
-    # pa spor Mailgun može zauvek blokirati request thread. requests-based backend
-    # prosleđuje REQUESTS_TIMEOUT requests pozivu. Sinhrono slanje sa timeout-om —
-    # async stek (broker) je VAN MVP obima.
-    "REQUESTS_TIMEOUT": MAILGUN_SEND_TIMEOUT,
-}
-# Contract assert (AC4/NFR-5): prod mora čitati ključ iz env-a — env("MAILGUN_API_KEY").
-# Fail-fast: BEZ default="" — django-environ podiže ImproperlyConfigured pri učitavanju
-# settings-a ako MAILGUN_API_KEY / MAILGUN_SENDER_DOMAIN nisu postavljeni (ispravno za
-# prod: nepodešen mailer pada odmah na startu, ne tek na prvom Mailgun 401 pri slanju).
+# Send-timeout (~10s) — spor SMTP NE sme zauvek da blokira request thread. Django
+# SMTP backend prosleđuje ovo kao socket timeout; sinhrono slanje (async broker je
+# VAN MVP obima). Zadržan kontraktni 10s iz Story 6.4 AC4.
+EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)  # noqa: F405

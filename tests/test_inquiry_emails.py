@@ -25,9 +25,9 @@ module MUST FAIL/ERROR until the Dev implements (GREEN phase):
 
   * inquiries/emails.py (notify_agent / send_auto_reply / send_inquiry_notifications);
   * the create_inquiry hook after inquiry.save();
-  * config/settings/* email backends (base DEFAULT_FROM_EMAIL + 'anymail' in
-    INSTALLED_APPS; dev console; test LOCMEM so mail.outbox is populated; prod
-    anymail Mailgun from env);
+  * config/settings/* email backends (base DEFAULT_FROM_EMAIL; dev console; test
+    LOCMEM so mail.outbox is populated; prod Django SMTP backend over Loopia,
+    EMAIL_* from env);
   * BASE_DIR/templates/email/{agent_notification,auto_reply}.{html,txt}.
 
 Design / locked rules (mirrors the 4.2 / 5.1 harness):
@@ -552,46 +552,54 @@ def test_default_from_email_is_set():
     )
 
 
-def test_anymail_in_installed_apps():
-    # AC4 (LOCKED): 'anymail' is added to INSTALLED_APPS (documented django-anymail
-    # setup; harmless in dev/test as console/locmem ignore it).
-    assert "anymail" in settings.INSTALLED_APPS, (
-        "'anymail' must be added to INSTALLED_APPS (LOCKED django-anymail setup) (AC4)."
+def test_prod_uses_django_smtp_backend():
+    # AC4: prod sends over Loopia SMTP (deploy decision — NOT Mailgun/anymail). The
+    # prod source must select the Django built-in SMTP backend. Source inspection —
+    # importing prod requires the EMAIL_* env vars (fail-fast) and would crash here.
+    prod_src = (
+        pathlib.Path(settings.BASE_DIR) / "config" / "settings" / "prod.py"
+    ).read_text(encoding="utf-8")
+    assert "django.core.mail.backends.smtp.EmailBackend" in prod_src, (
+        "config/settings/prod.py must use the Django SMTP backend "
+        "(django.core.mail.backends.smtp.EmailBackend) for Loopia SMTP (AC4)."
+    )
+    assert "anymail" not in prod_src.lower(), (
+        "config/settings/prod.py must NOT reference anymail/Mailgun anymore — "
+        "email goes through Loopia SMTP (AC4)."
     )
 
 
-def test_anymail_importable():
-    # AC4 (smoke): the django-anymail[mailgun] package is installed (v15.0) so the
-    # prod Mailgun backend reference resolves.
-    import anymail  # noqa: F401
-
-
-def test_settings_have_no_hardcoded_mailgun_key():
-    # AC4 (NFR-5): the config/settings/ source must not contain a literal Mailgun
-    # API key — credentials come from env (env("MAILGUN_API_KEY")). We assert there
-    # is no hardcoded assignment of a key literal, and that the prod module reads
-    # MAILGUN_API_KEY from env.
+def test_settings_have_no_hardcoded_smtp_password():
+    # AC4 (NFR-5): the config/settings/ source must not contain a literal SMTP
+    # password — credentials come from env (env("EMAIL_HOST_PASSWORD")). The prod
+    # module must read EMAIL_HOST_PASSWORD from env, fail-fast (no default).
     settings_dir = pathlib.Path(settings.BASE_DIR) / "config" / "settings"
     prod_src = (settings_dir / "prod.py").read_text(encoding="utf-8")
     base_src = (settings_dir / "base.py").read_text(encoding="utf-8")
-    combined = prod_src + "\n" + base_src
-    # A real Mailgun key is "key-<32 hex>". Assert no such literal is present.
     import re
-    assert not re.search(r"key-[0-9a-fA-F]{16,}", combined), (
-        "config/settings/ must NOT contain a hardcoded Mailgun API key — read it "
+    assert (
+        'env("EMAIL_HOST_PASSWORD")' in prod_src
+        or "env('EMAIL_HOST_PASSWORD')" in prod_src
+    ), (
+        "config/settings/prod.py must read EMAIL_HOST_PASSWORD from env "
+        "(env(\"EMAIL_HOST_PASSWORD\")) — never hardcoded (AC4/NFR-5)."
+    )
+    # No hardcoded password assignment (a literal string after `EMAIL_HOST_PASSWORD =`).
+    assert not re.search(
+        r'EMAIL_HOST_PASSWORD\s*=\s*["\'][^"\']+["\']', prod_src + "\n" + base_src
+    ), (
+        "config/settings/ must NOT assign a literal EMAIL_HOST_PASSWORD — read it "
         "from env (NFR-5) (AC4)."
     )
-    assert 'env("MAILGUN_API_KEY")' in prod_src or "env('MAILGUN_API_KEY')" in prod_src, (
-        "config/settings/prod.py must read MAILGUN_API_KEY from env "
-        "(env(\"MAILGUN_API_KEY\")) — never hardcoded (AC4)."
-    )
-    # Fail-fast (Dev A #4): prod must NOT mask a misconfigured Mailgun key with a
-    # default="" — an empty key would pass check/startup but 401 at send time.
-    # django-environ must raise ImproperlyConfigured at settings load if it is unset.
-    assert not re.search(r'env\(\s*["\']MAILGUN_API_KEY["\']\s*,\s*default\s*=', prod_src), (
-        "config/settings/prod.py must NOT pass default=\"\" to "
-        "env(\"MAILGUN_API_KEY\") — prod must fail-fast (ImproperlyConfigured) when "
-        "the key is unset, not silently 401 at send time (AC4/NFR-5)."
+    # Fail-fast: prod must NOT mask a missing password with a default — an empty
+    # password would start fine but fail SMTP auth at send time. django-environ must
+    # raise ImproperlyConfigured at settings load if it is unset.
+    assert not re.search(
+        r'env\(\s*["\']EMAIL_HOST_PASSWORD["\']\s*,\s*default\s*=', prod_src
+    ), (
+        "config/settings/prod.py must NOT pass default= to "
+        "env(\"EMAIL_HOST_PASSWORD\") — prod must fail-fast (ImproperlyConfigured) "
+        "when it is unset (AC4/NFR-5)."
     )
 
 

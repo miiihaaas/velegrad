@@ -304,8 +304,10 @@ def test_env_example_exists_and_lists_all_key_vars():
         "DATABASE_URL",
         "ADMIN_URL",
         "STORAGE_BACKEND",
-        "MAILGUN_API_KEY",
-        "MAILGUN_SENDER_DOMAIN",
+        "EMAIL_HOST",
+        "EMAIL_HOST_USER",
+        "EMAIL_HOST_PASSWORD",
+        "EMAIL_USE_TLS",
         "DEFAULT_FROM_EMAIL",
         "GOOGLE_ANALYTICS_ID",
     ]
@@ -387,7 +389,6 @@ def test_base_contains_architecture_runtime_packages():
         "Pillow",
         "django-imagekit",
         "django-storages",
-        "django-anymail",
         "django-ratelimit",
         "whitenoise",
     ]

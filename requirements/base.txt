@@ -24,8 +24,8 @@ django-imagekit
 django-storages
 # boto3  # deferred S3 dependency — uncomment when S3 storage is activated (arch §1.4)
 
-# Email
-django-anymail[mailgun]
+# Email — prod šalje preko Loopia SMTP-a (Django ugrađeni smtp backend; bez
+# eksternog paketa). Vidi config/settings/prod.py i docs/deploy-handoff.md.
 
 # Security / anti-spam
 django-ratelimit

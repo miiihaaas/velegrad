@@ -14,7 +14,7 @@ SCOPE DISCIPLINE (read the interface contract):
     - AC6a  prod CACHES shared-cache override (scoped; dev/test keep LocMemCache)
     - AC6b  non-spoofable client-IP resolver (core.ratelimit.client_ip_key) — HIGHEST VALUE
     - AC6c  removal of SILENCED_SYSTEM_CHECKS (E003/W001) in prod
-    - AC4   Mailgun send-timeout (custom requests session / REQUESTS_TIMEOUT — NOT Celery)
+    - AC4   email send-timeout (Django SMTP EMAIL_TIMEOUT — NOT Celery)
     - AC5   new prod requirements (django-redis, django-ipware) + new .env vars
     - AC1   deploy artifacts (deploy/gunicorn.service, deploy nginx vhost)
     - AC3   backup scripts (scripts/backup_db.sh, scripts/backup_media.sh)
@@ -386,50 +386,49 @@ def test_base_may_keep_silencing_for_dev_test_locmem():
 
 
 # =========================================================================== #
-# AC4 — Mailgun send-timeout (custom requests session / REQUESTS_TIMEOUT)      #
+# AC4 — email send-timeout (Django SMTP EMAIL_TIMEOUT)                         #
 # =========================================================================== #
-def test_prod_configures_mailgun_send_timeout():
-    # AC4: prod.py must configure an explicit send timeout for the anymail Mailgun
-    # backend — via ANYMAIL["REQUESTS_TIMEOUT"] or a custom requests.Session timeout.
+def test_prod_configures_email_send_timeout():
+    # AC4: prod.py must configure an explicit send timeout so a slow SMTP server
+    # cannot block the request thread forever — Django's EMAIL_TIMEOUT (the SMTP
+    # backend has no default send-timeout).
     src = _strip_comments(_read("config", "settings", "prod.py"))
     assert src, "config/settings/prod.py does not exist"
-    has_anymail_timeout = re.search(r"REQUESTS_TIMEOUT", src)
-    has_session_timeout = re.search(r"requests", src, re.I) and re.search(
-        r"timeout", src, re.I
-    )
-    assert has_anymail_timeout or has_session_timeout, (
-        "prod.py must configure a Mailgun send-timeout (ANYMAIL['REQUESTS_TIMEOUT'] "
-        "or a custom requests session with a timeout) — anymail has no default timeout"
+    assert re.search(r"\bEMAIL_TIMEOUT\b", src), (
+        "prod.py must configure EMAIL_TIMEOUT (SMTP socket send-timeout) — the Django "
+        "SMTP backend has no default, so a slow server could hang the request thread"
     )
 
 
-def test_prod_mailgun_timeout_is_roughly_ten_seconds():
-    # AC4: the configured timeout must be a sane finite value — exactly 10s is the
-    # recommended/contract value. We assert the timeout resolves to 10 by importing
-    # the prod module's effective ANYMAIL config (source regex would miss the
-    # MAILGUN_SEND_TIMEOUT indirection). Accept >=5 as the lower sanity bound but
-    # require the contract value of exactly 10 for this story.
-    prod = _import_settings("prod")
-    anymail = getattr(prod, "ANYMAIL", {})
-    timeout = anymail.get("REQUESTS_TIMEOUT")
-    assert timeout is not None, (
-        "prod ANYMAIL must set REQUESTS_TIMEOUT (Mailgun has no default send-timeout)"
+def test_prod_email_timeout_is_ten_seconds():
+    # AC4: the configured send timeout must be the contract value of 10s. Source
+    # inspection (mirrors the other prod-only asserts): importing prod requires the
+    # fail-fast EMAIL_* env vars and would crash a CI box without them, so we assert
+    # the EMAIL_TIMEOUT default in the source instead.
+    src = _strip_comments(_read("config", "settings", "prod.py"))
+    assert src, "config/settings/prod.py does not exist"
+    m = re.search(
+        r"EMAIL_TIMEOUT\s*=\s*env\.int\(\s*[\"']EMAIL_TIMEOUT[\"']\s*,\s*default\s*=\s*(\d+)",
+        src,
     )
-    # Support a scalar (10) or a (connect, read) tuple — take the max for the bound.
-    value = max(timeout) if isinstance(timeout, (list, tuple)) else timeout
-    assert value >= 5, f"Mailgun send-timeout must be a sane >=5s value, got {timeout!r}"
+    assert m, (
+        "prod.py must set EMAIL_TIMEOUT = env.int(\"EMAIL_TIMEOUT\", default=<n>) "
+        "(env-driven with an explicit default)"
+    )
+    value = int(m.group(1))
+    assert value >= 5, f"EMAIL_TIMEOUT must be a sane >=5s value, got {value}"
     assert value == 10, (
-        f"Mailgun send-timeout must be exactly 10s per the story contract, got {timeout!r}"
+        f"EMAIL_TIMEOUT must be exactly 10s per the story contract, got {value}"
     )
 
 
 def test_prod_does_not_introduce_celery():
     # AC4 (NEGATIVE): Celery / async sending is EXPLICITLY out of MVP scope (no broker).
-    # The timeout must be solved with a requests session — NOT by adding Celery.
-    # We strip comments first: the existing TRACKED note in prod.py legitimately
-    # mentions the word "Celery" in prose, and the Dev must not be forced to delete
-    # an explanatory comment to satisfy this guard. The contract is "no REAL Celery
-    # config/import" — so assert on the de-commented source only.
+    # The timeout must be solved with EMAIL_TIMEOUT — NOT by adding Celery.
+    # We strip comments first: a TRACKED note in prod.py legitimately mentions the
+    # word "Celery" in prose, and the Dev must not be forced to delete an explanatory
+    # comment to satisfy this guard. The contract is "no REAL Celery config/import" —
+    # so assert on the de-commented source only.
     src = _strip_comments(_read("config", "settings", "prod.py"))
     assert src, "config/settings/prod.py does not exist"
     assert not re.search(r"\bcelery\b", src, re.I), (
@@ -496,8 +495,10 @@ def test_env_example_preserves_all_existing_required_vars():
         "DATABASE_URL",
         "ADMIN_URL",
         "STORAGE_BACKEND",
-        "MAILGUN_API_KEY",
-        "MAILGUN_SENDER_DOMAIN",
+        "EMAIL_HOST",
+        "EMAIL_HOST_USER",
+        "EMAIL_HOST_PASSWORD",
+        "EMAIL_USE_TLS",
         "DEFAULT_FROM_EMAIL",
         "GOOGLE_ANALYTICS_ID",
     ]
